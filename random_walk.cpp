@@ -5,14 +5,13 @@
 #include <fstream>
 #include <iomanip>
 #include <random>
-using namespace std;
 
 #define SPHERE_RADIUS 1000
 #define MEAN_FREE_PATH 10
 #define SEED 123
 #define SET_COL 15
 
-vector<double> sample_direction();
+std::vector<double> sample_direction();
 double sample_path_length();
 
 class event_log {
@@ -34,7 +33,7 @@ class event_log {
         void get_distance(){ pl = sample_path_length();}
     // Get particle direction
         void get_direction(){
-            vector<double> direction = sample_direction();
+	  std::vector<double> direction = sample_direction();
             u = direction[0];
             v = direction[1];
             w = direction[2];
@@ -42,7 +41,7 @@ class event_log {
     // Get particle energy
         void get_energy(){ 
             // set normal dist for E sampling
-            normal_distribution<double> normal_dist(5.0,2.0);
+	  std::normal_distribution<double> normal_dist(5.0,2.0);
             E = normal_dist(generator);
         }
     // calculate particle radius
@@ -55,15 +54,15 @@ class event_log {
         }
 
     // save particle log
-        void save_log(ofstream& logfile){
-	  logfile << left << setw(SET_COL) << x
-		  << left << setw(SET_COL) << y
-		  << left << setw(SET_COL) << z
-		  << left << setw(SET_COL) << u
-		  << left << setw(SET_COL) << v
-		  << left << setw(SET_COL) << w
-		  << left << setw(SET_COL) << pl
-		  << left << setw(SET_COL) << E << "\n";
+  void save_log(std::ofstream& logfile){
+	  logfile << std::left << std::setw(SET_COL) << x
+		  << std::left << std::setw(SET_COL) << y
+		  << std::left << std::setw(SET_COL) << z
+		  << std::left << std::setw(SET_COL) << u
+		  << std::left << std::setw(SET_COL) << v
+		  << std::left << std::setw(SET_COL) << w
+		  << std::left << std::setw(SET_COL) << pl
+		  << std::left << std::setw(SET_COL) << E << "\n";
         }
 };
 
@@ -78,14 +77,14 @@ double sample_path_length(){
     return path_length*MEAN_FREE_PATH;
 }
 
-vector<double> sample_direction(){
+std::vector<double> sample_direction(){
     // sample the particle direction in cartesian space, return a direction
     // vector, (u, v, w)
 
     double psi = static_cast<double>( rand() ) / static_cast<double>(RAND_MAX);
     double eta = static_cast<double>( rand() ) / static_cast<double>(RAND_MAX);
     
-    vector<double> direction(3);
+    std::vector<double> direction(3);
     double pi = 4*atan(1);
     double w = 2*psi - 1;
     double u = sqrt(1-w*w)*cos(2*pi*eta);
@@ -98,7 +97,7 @@ vector<double> sample_direction(){
     return direction;
 }
 
-void walk_particle(ofstream& logfile){
+void walk_particle(std::ofstream& logfile){
     // Performs the random walk for each particle
     // This function calls the required methods to sample the random-walk
     // physics for a single particle. For each path traversed, store the
@@ -130,11 +129,11 @@ void walk_particle(ofstream& logfile){
 
 int main(int argc, char** argv){
     if(argc != 2){
-        cout << "Usage N_particles" << endl;
+      std::cout << "Usage N_particles" << std::endl;
     }
     int N = atoi(argv[1]);
     srand(SEED);
-    ofstream event_history;
+    std::ofstream event_history;
     event_history.open("event_history.txt");
     
     for (int i=0; i < N; i++){
