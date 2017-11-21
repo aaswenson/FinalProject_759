@@ -9,6 +9,7 @@
 #define SPHERE_RADIUS 1000
 #define MEAN_FREE_PATH 10
 #define SEED 123
+#define SET_COL 15
 
 std::vector<double> sample_direction();
 double sample_path_length();
@@ -32,7 +33,7 @@ class event_log {
         void get_distance(){ pl = sample_path_length();}
     // Get particle direction
         void get_direction(){
-            std::vector<double> direction = sample_direction();
+	  std::vector<double> direction = sample_direction();
             u = direction[0];
             v = direction[1];
             w = direction[2];
@@ -40,7 +41,7 @@ class event_log {
     // Get particle energy
         void get_energy(){ 
             // set normal dist for E sampling
-            std::normal_distribution<double> normal_dist(5.0,2.0);
+	  std::normal_distribution<double> normal_dist(5.0,2.0);
             E = normal_dist(generator);
         }
     // calculate particle radius
@@ -53,11 +54,15 @@ class event_log {
         }
 
     // save particle log
-        void save_log(std::ofstream& logfile){
-        logfile << std::left << x << "     " << y << "     " << z << "     ";
-        logfile << std::left << u << "     " << v << "     " << w << "     ";
-        logfile << std::left << pl << "     ";
-        logfile << std::left << E << "\n";
+  void save_log(std::ofstream& logfile){
+	  logfile << std::left << std::setw(SET_COL) << x
+		  << std::left << std::setw(SET_COL) << y
+		  << std::left << std::setw(SET_COL) << z
+		  << std::left << std::setw(SET_COL) << u
+		  << std::left << std::setw(SET_COL) << v
+		  << std::left << std::setw(SET_COL) << w
+		  << std::left << std::setw(SET_COL) << pl
+		  << std::left << std::setw(SET_COL) << E << "\n";
         }
 };
 
@@ -124,7 +129,7 @@ void walk_particle(std::ofstream& logfile){
 
 int main(int argc, char** argv){
     if(argc != 2){
-        std::cout << "Usage N_particles" << std::endl;
+      std::cout << "Usage N_particles" << std::endl;
     }
     int N = atoi(argv[1]);
     srand(SEED);
