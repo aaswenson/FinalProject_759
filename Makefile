@@ -7,7 +7,7 @@ ARCH   	:= -march=native
 
 # Language standard
 CCSTD	:= -std=c99
-CXXSTD	:= -std=c++14
+CXXSTD	:= -std=c++11
 
 # Linker options
 LDOPT 	:= $(OPT)
