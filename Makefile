@@ -11,10 +11,13 @@ CXXSTD	:= -std=c++11
 
 # Linker options
 LDOPT 	:= $(OPT)
-LDFLAGS := -fopenmp -lpthread -mavx
+LDFLAGS := -fopenmp -lpthread -mavx -lMOAB
 
 # Names of executables to create
-EXEC := random_walk
+EXEC := random_walk gen_mesh
+
+# Includes
+Linked_Libs := /home/alex/opt/moab/include
 
 .DEFAULT_GOAL := all
 
@@ -30,6 +33,9 @@ random_walk : random_walk.cpp
 	@ echo Building $@...
 	@ $(CXX) $(CXXSTD) -o $@ $< $(LDFLAGS) $(OPT)
 
+gen_mesh : gen_mesh.cpp
+	@ echo Building $@...
+	@ $(CXX) $(CXXSTD) -I$(Linked_Libs) -L$(Linked_Libs) -o $@ $< $(LDFLAGS) $(OPT) 
 
 # TODO: add targets for building executables
 
