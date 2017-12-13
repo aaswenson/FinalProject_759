@@ -17,7 +17,7 @@ LDFLAGS := -fopenmp -lpthread -mavx -lMOAB
 EXEC := random_walk gen_mesh
 
 # Includes
-Linked_Libs := /home/alex/opt/moab/include
+Linked_Libs := ~/opt/moab/include
 
 .DEFAULT_GOAL := all
 
@@ -37,8 +37,15 @@ gen_mesh : gen_mesh.cpp
 	@ echo Building $@...
 	@ $(CXX) $(CXXSTD) -I$(Linked_Libs) -L$(Linked_Libs) -o $@ $< $(LDFLAGS) $(OPT) 
 
+mesh_ex : StructuredMeshSimple.cpp
+	@ echo Building $@...
+	@ $(CXX) $(CXXSTD) -I$(Linked_Libs) -L$(Linked_Libs) -o $@ $< $(LDFLAGS) $(OPT) 
+
+convert_h5m :
+	$(MOAB_PATH)/bin/mbconvert $(FILE) $(NEWFILE)
+
 # TODO: add targets for building executables
 
 .PHONY: clean
 clean:
-	@ rm -f $(EXEC) $(OBJS) *.out
+	@ rm -f $(EXEC) $(OBJS) *.out *.vtk *h5m

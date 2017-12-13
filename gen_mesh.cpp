@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
 
     std::string N = (1, argv[1]);
     std::string h = (1, argv[2]);
-    std::string mesh_name = "structured_mesh_" + N + "_" + h + ".vtk";
+    std::string mesh_name = "structured_mesh_" + N + "_" + h + ".h5m";
     const unsigned NI = atoi(argv[1]);
     const unsigned NJ = atoi(argv[2]);
     const unsigned NK = atoi(argv[3]);
@@ -72,8 +72,7 @@ int main(int argc, char* argv[])
       
     // Write the mesh object to file
     const char* savefile = mesh_name.c_str();
-    rval = mbint.write_file(savefile);
-    MB_CHK_SET_ERR(rval, "write_file(struct_mesh.vtk)");
+    rval = mbint.write_file(savefile); MB_CHK_SET_ERR(rval, "Write File");
 
 
     return 0;
