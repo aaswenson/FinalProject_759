@@ -70,5 +70,25 @@ int main(int argc, char* argv[])
     
     twoDmesh mesh = gen_mesh(NI, NJ, NK, DX, DY, DZ);
 
+    // Read event_history.txt and get lines.
+    lines = read_hist('event_history.txt');
+
+    for line in lines {
+	p = (x,y,z);  // Initial poistion
+	d = (u,v,w);  // Direction
+	l = track_length;  // Total track length in the direction.
+	(i,j,k) = get_voxel_indices(mesh, p);  // Get mesh indices of initial point. straightforward-version.
+	(xs,ys,zs), ls = calc_crossing(mesh, (i,j,k), p, d, l);  // Get crossing point and dist2surf.
+	save_value_in_mesh(mesh, (i,j,k), ls);  // Store track length(dist2surf) in the mesh.
+
+	while ls < l{  // Compare dist2surf with remaining track length.
+	    (x,y,z) = (xs,ys,zs);  // Reset starting point
+	    l = l - ls // Reduce track length.
+	    (i,j,k) = march_mesh(mesh, (xc,yc,zc));  // Increase mesh indices.
+	    (xs,ys,zs), ls = calc_crossing(mesh, (i,j,k), p, d, l);  // Get crossing point and dist2surf.
+	    save_value_in_mesh(mesh, (i,j,k), ls)  // Store track length(dist2surf) in the mesh.
+	  }
+      }
+
     return 0;
 }
