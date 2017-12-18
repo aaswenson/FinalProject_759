@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 #include <cstdio>
 #include <cmath>
 #include <vector>
@@ -22,10 +23,15 @@ struct particleTrack{
 class collision_event{
     
     public:
+        float V;
         float x, y, z;
         float checkx, checky, checkz;
         float u, v, w;
+        float s;
+        int inc_vox[3];
+        int vox_ID[3];
         unsigned int i, j, k;
+
         // place to store voxel surface data
         float x_surfs[2];
         float y_surfs[2];
@@ -34,12 +40,16 @@ class collision_event{
         // remaining track length
         float rtl;
         
-        void start_particle(unsigned int trackID, particleTrack data,
-                            unsigned int NI, 
-                            unsigned int NJ, 
-                            unsigned int NK){
+        void calc_vox_vol(twoDmesh mesh){V = mesh.dx*mesh.dy*mesh.dz;}
+
+        void start_particle(unsigned int trackID, 
+                            particleTrack data, twoDmesh mesh){
+            
             // load data for new particle (launched from 0,0,0)
-            i = (NI-1)/2; j = (NJ-1)/2; k = (NK-1)/2;
+            vox_ID[0] = (mesh.NI-1)/2; 
+            vox_ID[1] = (mesh.NJ-1)/2; 
+            vox_ID[2] = (mesh.NK-1)/2;
+            
             x = data.x_pos[trackID];
             y = data.y_pos[trackID];
             z = data.z_pos[trackID];
@@ -50,9 +60,9 @@ class collision_event{
         }
 
         void get_voxel_surfs(twoDmesh mesh){
-            x_surfs[0] = mesh.x[i]; x_surfs[1] = mesh.x[i+1];
-            y_surfs[0] = mesh.y[j]; y_surfs[1] = mesh.y[j+1];
-            z_surfs[0] = mesh.z[k]; z_surfs[1] = mesh.z[k+1];
+            x_surfs[0] = mesh.x[vox_ID[0]]; x_surfs[1] = mesh.x[vox_ID[0]+1];
+            y_surfs[0] = mesh.y[vox_ID[1]]; y_surfs[1] = mesh.y[vox_ID[1]+1];
+            z_surfs[0] = mesh.z[vox_ID[2]]; z_surfs[1] = mesh.z[vox_ID[2]+1];
         }
 
         void eliminate_surfs(){
@@ -63,6 +73,62 @@ class collision_event{
             checky = y_surfs[(int)(v+1)];
             checkz = z_surfs[(int)(w+1)];
         }
+
+        void distance_to_cross(){
+            // get distance to crossing for each of the three eligible surfaces
+            // create the transformation vector to increment voxel_ID
+            inc_vox[0] = 0; inc_vox[1] = 0; inc_vox[2] = 0;
+            int inc_idx = 0;
+            float inc_val = u;
+            
+            s = (checkx-x)/u;
+            
+            if (s > (checky-y)/v){ 
+                s = (checky-y)/v;
+                inc_val = v;
+                inc_idx = 1;
+            }
+            if (s > (checkz-z)/w){
+                s = (checkz-z)/w;
+                inc_val = w;
+                inc_idx = 2;
+            }
+            inc_vox[inc_idx] = inc_val / fabs(inc_val);
+        }
+        
+        void update_tl(twoDmesh mesh){
+            if (rtl > s){
+                mesh.flux[vox_ID[0] + 
+                      vox_ID[1]*mesh.NJ + 
+                      vox_ID[2]*mesh.NJ*mesh.NK] = s / V;
+                // update remaining track length
+                rtl -= s;
+            }
+            else{
+                // expend remaining track length inside voxel
+                mesh.flux[vox_ID[0] + 
+                      vox_ID[1]*mesh.NJ + 
+                      vox_ID[2]*mesh.NJ*mesh.NK] = rtl / V;
+            }
+        }
+
+        void update_voxel_ID(){
+            // increment the voxel ID based on the surface crossed upon voxel
+            // exit
+            std::transform(&inc_vox[0], &inc_vox[2], 
+                           &vox_ID[0], 
+                           &vox_ID[0], 
+                           std::plus<int>());
+        }
+
+        void update_pos(){
+            // update the x,y,z position
+            x += u*s;
+            y += v*s;
+            z += w*s;
+        }
+
+        
 };
 
 // particle track file length 
@@ -133,9 +199,14 @@ void seq_tally(particleTrack col_data, twoDmesh mesh,
                    int NI, int NJ, int NK){
 
         collision_event particle;
-        particle.start_particle(0, col_data, NI, NJ, NK); 
+        particle.calc_vox_vol(mesh);
+        particle.start_particle(0, col_data, mesh); 
         particle.get_voxel_surfs(mesh);
         particle.eliminate_surfs();
+        particle.distance_to_cross();
+        particle.update_tl(mesh);
+        particle.update_voxel_ID();
+        particle.update_pos();
 }
 
 
