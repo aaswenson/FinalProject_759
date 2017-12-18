@@ -4,8 +4,7 @@
 #include <string>
 #include <vector>
 
-class twoDmesh {
-    public:
+struct twoDmesh {
         unsigned int Nx;
         unsigned int Ny;
         unsigned int Nz;
