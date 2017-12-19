@@ -35,7 +35,7 @@ random_walk : random_walk.cpp
 
 seq_tally : seq_tally.cpp
 	@ echo Building $@...
-	@ $(CXX) $(CXXSTD) -I$(Linked_Libs) -L$(Linked_Libs) -o $@ $< $(LDFLAGS) $(OPT)
+	@ $(CXX) $(CXXSTD) -g -I$(Linked_Libs) -L$(Linked_Libs) -o $@ $< $(LDFLAGS) $(OPT)
 
 mesh_ex : StructuredMeshSimple.cpp
 	@ echo Building $@...
