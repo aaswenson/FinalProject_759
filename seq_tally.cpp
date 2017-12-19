@@ -46,7 +46,6 @@ class collision_event{
         void start_track(unsigned int trackID, 
                             particleTrack data, twoDmesh mesh){
             
-
             x = data.x_pos[trackID];
             y = data.y_pos[trackID];
             z = data.z_pos[trackID];
@@ -85,18 +84,16 @@ class collision_event{
             
             inc_vox[0] = 0; inc_vox[1] = 0; inc_vox[2] = 0;
             
-            float s;
             float sx = (checkx-x)/u;
             float sy = (checky-y)/v;
             float sz = (checkz-z)/w;
-            int inc_idx;
+            s = sx;
+            int inc_idx = 0;
             float inc_val = u;
             
-            if (sx < sy && sx < sz){
-                s = sx; inc_val = u; inc_idx = 0;
-            }else if (sy < sx && sy < sz){ 
+            if (sy < s){
                 s = sy; inc_val = v; inc_idx = 1;
-            }else{
+            }else if (sz < s){ 
                 s = sz; inc_val = w; inc_idx = 2;
             }
             
@@ -129,10 +126,9 @@ class collision_event{
         void update_voxel_ID(){
             // increment the voxel ID based on the surface crossed upon voxel
             // exit
-            std::transform(&inc_vox[0], &inc_vox[2], 
-                           &vox_ID[0], 
-                           &vox_ID[0], 
-                           std::plus<int>());
+            vox_ID[0] += inc_vox[0];
+            vox_ID[1] += inc_vox[1];
+            vox_ID[2] += inc_vox[2];
         }
 
         void update_pos(float travel){
@@ -143,13 +139,14 @@ class collision_event{
         }
 
         void walk_particle(twoDmesh mesh){
-           while (rtl > 0 ){
-               std::cout << x << std::endl;
+            int test = 0;
+            while (rtl > 0){
                get_voxel_surfs(mesh);
                eliminate_surfs();
                distance_to_cross();
                update_tl(mesh);
                update_voxel_ID();
+               test++;
             }
         }
 };
@@ -256,6 +253,6 @@ int main(int argc, char* argv[]){
     twoDmesh mesh = gen_mesh(NI, NJ, NK, DX, DY, DZ);
     // start tallying
     seq_tally(N, dataTrack, mesh, NI, NJ, NK);
-
+    std::cout << (int) 2/3 << std::endl;
     return 0;
 }
