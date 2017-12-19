@@ -11,10 +11,11 @@ CXXSTD	:= -std=c++11
 
 # Linker options
 LDOPT 	:= $(OPT)
-LDFLAGS := -fopenmp -lpthread -mavx -lMOAB
+LDFLAGS := -fopenmp -lpthread -mavx
+BIN = "/usr/local/gcc/6.4.0/bin/gcc"
 
 # Names of executables to create
-EXEC := random_walk seq_tally
+EXEC := random_walk seq_tally par_walk_tally
 
 # Includes
 Linked_Libs := ~/opt/moab/include
@@ -41,11 +42,11 @@ mesh_ex : StructuredMeshSimple.cpp
 	@ echo Building $@...
 	@ $(CXX) $(CXXSTD) -I$(Linked_Libs) -L$(Linked_Libs) -o $@ $< $(LDFLAGS) $(OPT) 
 
-convert_h5m :
-	$(MOAB_PATH)/bin/mbconvert $(FILE) $(NEWFILE)
+par_walk: par_walk_tally.cu 
+	nvcc -o par_walk_tally $(OPT) $(CXXSTD) par_walk_tally.cu
 
 # TODO: add targets for building executables
 
 .PHONY: clean
 clean:
-	@ rm -f $(EXEC) $(OBJS) *.out *.vtk *h5m
+	@ rm -f $(EXEC) $(OBJS) *.out

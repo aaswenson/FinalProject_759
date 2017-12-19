@@ -5,21 +5,13 @@
 #include <vector>
 #include <fstream>
 #include <iomanip>
+#include <cuda.h>
 #include <gen_mesh.cpp>
 #include <random_walk.cpp>
 #include <read_methods.cpp>
+#include <cuda_prep.cu>
 
-void seq_tally(int N, particleTrack col_data, twoDmesh mesh,
-                   int NI, int NJ, int NK){
-
-        collision_event particle;
-        particle.calc_vox_vol(mesh);
-                
-        for (int partID = 0; partID <col_data.Ntracks; partID++){
-            particle.start_track(partID, col_data, mesh);
-            particle.walk_particle(mesh);
-        }       
-}
+__global__ void walktally(){}
 
 
 int main(int argc, char* argv[]){
@@ -45,8 +37,12 @@ int main(int argc, char* argv[]){
     particleTrack dataTrack = read_array("event_history.txt");
     // generate mesh
     twoDmesh mesh = gen_mesh(NI, NJ, NK, DX, DY, DZ);
-    // start tallying
-    seq_tally(N, dataTrack, mesh, NI, NJ, NK);
-    std::cout << (int) 2/3 << std::endl;
+    
+    particleTrack data = AllocatePtracData(dataTrack);
+    twoDmesh dmesh = AllocateMeshData(mesh);
+    CopyDatatoDevice(data, dataTrack, dmesh, mesh);
+    walktally<<<1,1>>>();
+
+
     return 0;
 }
