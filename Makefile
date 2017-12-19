@@ -14,7 +14,7 @@ LDOPT 	:= $(OPT)
 LDFLAGS := -fopenmp -lpthread -mavx -lMOAB
 
 # Names of executables to create
-EXEC := random_walk gen_mesh seq_tally
+EXEC := random_walk seq_tally
 
 # Includes
 Linked_Libs := ~/opt/moab/include
@@ -35,11 +35,7 @@ random_walk : random_walk.cpp
 
 seq_tally : seq_tally.cpp
 	@ echo Building $@...
-	@ $(CXX) $(CXXSTD) -o $@ $< $(LDFLAGS) $(OPT)
-
-gen_mesh : gen_mesh.cpp
-	@ echo Building $@...
-	@ $(CXX) $(CXXSTD) -I$(Linked_Libs) -L$(Linked_Libs) -o $@ $< $(LDFLAGS) $(OPT) 
+	@ $(CXX) $(CXXSTD) -I$(Linked_Libs) -L$(Linked_Libs) -o $@ $< $(LDFLAGS) $(OPT)
 
 mesh_ex : StructuredMeshSimple.cpp
 	@ echo Building $@...
