@@ -1,0 +1,87 @@
+% ------------------------- document type -------------------------------------
+\documentclass[12pt]{article}
+\usepackage{layout} % show a page layout
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{fullpage}
+\setlength{\hoffset}{0.0in}
+\setlength{\oddsidemargin}{-.5in}
+\setlength{\textwidth}{.85\paperwidth}
+
+\lstset { %
+    language=C++,
+    backgroundcolor=\color{black!5}, % set backgroundcolor
+    basicstyle=\footnotesize,% basic font setting
+}
+
+% ----------------------- title and authors -----------------------------------
+\title{
+        {ME 759 Project Report}\\
+        {\large University of Wisconsin-Madison}
+}
+\author{Alex Swenson\\
+       \texttt{aaswenson@wisc.edu}
+       \and
+       Nancy Granda\\
+       \texttt{grandaduarte@wisc.edu}
+       \and
+       YoungHui Park\\
+       \texttt{ypark24@wisc.edu}
+       }
+\date{\today}
+
+% ---------------------- packages to include ----------------------------------
+\usepackage{graphicx} 	
+\usepackage{times}
+\usepackage{microtype} 	
+\usepackage{caption}	
+\usepackage{multirow}  	
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{amsmath}  	
+\usepackage{color,soul} 
+\usepackage{lipsum}
+\usepackage{cite}
+% ----------------------------------Main Document -----------------------------
+
+\setcounter{section}{0}
+
+\begin{document}
+
+\maketitle
+\newpage
+\tableofcontents
+\newpage
+\listoffigures
+\newpage
+\listoftables
+\newpage
+
+\input{intro}
+
+\input{background}
+
+\input{sequential}
+
+\input{parallel}
+
+\input{benchmark}
+
+\input{analysis}
+
+\input{conclusion}
+
+\newpage
+\clearpage
+\bibliographystyle{ieeetr}
+\bibliography{bibliography}
+% \newpage
+% \clearpage
+% \appendix
+% \input{something}
+
+
+\end{document}
+
