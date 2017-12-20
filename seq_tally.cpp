@@ -94,8 +94,8 @@ class collision_event{
         void update_tl(twoDmesh mesh){
             if (rtl > s){
                 mesh.flux[vox_ID[0] + 
-                      vox_ID[1]*mesh.NJ + 
-                      vox_ID[2]*mesh.NJ*mesh.NK] = s / V;
+                      vox_ID[1]*mesh.NI + 
+                      vox_ID[2]*mesh.NI*mesh.NJ] = s / V;
                 // update remaining track length and particle position
                 update_pos(s);
                 rtl -= s;
@@ -103,8 +103,8 @@ class collision_event{
             else{
                 // expend remaining track length inside voxel
                 mesh.flux[vox_ID[0] + 
-                      vox_ID[1]*mesh.NJ + 
-                      vox_ID[2]*mesh.NJ*mesh.NK] = rtl / V;
+                      vox_ID[1]*mesh.NI + 
+                      vox_ID[2]*mesh.NI*mesh.NJ] = rtl / V;
                 // update position
                 update_pos(rtl);
                 rtl = 0;
