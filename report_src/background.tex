@@ -1,5 +1,26 @@
 %%%%%%%%%%%%%%% background %%%%%%%%%%%
 
 \section{Background}
+Particle distribution in parameter space is an important modeled quantity in
+nuclear analysis. Particles (neutrons, photons, etc.) can vary in space and
+energy, and system response functions are often extremely sensitive to these
+parameter-space variations. Geometric meshes are used to describe spatial
+distributions. Due to the nature of Monte Carlo statistical modeling, there
+exists no analytic solution or numeric approximation to apply in geometric
+space. As a result, particle track histories need to be tallied on a geometric
+mesh.
 
+Complex systems can be modeled very accurately using Monte Carlo simulations.
+This degree of accuracy however is prequisite to an adequately-sampled geometry
+with good statistics. These statistics are often improved with more particle
+histories, which impacts not only the time required to generate the histories,
+but the time to tally the histories on a mesh. Computation time becomes more of
+for fine mesh grids over large geometric space. This is the motivation for mesh
+tally accelerations.
 
+Typically, this tallying process is performed sequentially by tracking the
+particle through the mesh. A single CPU tracks the particles through the
+geometry; it checks surface crossings, track lengths through voxels and updates
+voxel position. Along the particle track, it's track length contributes to the
+population of the mesh. All of the tallied histories provide a discritized
+approximation of the particle distribution in parameter space.
