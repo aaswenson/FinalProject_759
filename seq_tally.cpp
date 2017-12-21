@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <iostream>
 #include <algorithm>
 #include <cstdio>
@@ -10,8 +11,16 @@
 #include <read_methods.cpp>
 
 class collision_event{
-    
     public:
+        twoDmesh mesh;
+        collision_event(twoDmesh load_mesh){
+            mesh = load_mesh;
+            N = mesh.N;
+            dvox = mesh.h;
+            V = dvox*dvox*dvox;
+         }
+        unsigned int N;
+        float dvox; 
         float V;
         float x, y, z;
         float checkx, checky, checkz;
@@ -20,32 +29,24 @@ class collision_event{
         int inc_vox[3];
         int vox_ID[3];
         unsigned int i, j, k;
-
         // place to store voxel surface data
         float x_surfs[2];
         float y_surfs[2];
         float z_surfs[2];
 
-        float class_flux[27];
-
         // remaining track length
         float rtl;
         
-        void calc_vox_vol(twoDmesh mesh){V = mesh.dx*mesh.dy*mesh.dz;}
-
-        void start_track(unsigned int trackID, 
-                            particleTrack data, twoDmesh mesh){
+        void start_track(unsigned int trackID, particleTrack data){
             
             x = data.x_pos[trackID];
             y = data.y_pos[trackID];
             z = data.z_pos[trackID];
-            // load data for new particle (launched from 0,0,0)
-            if ((x*x + y*y + z*z) == 0){
-                vox_ID[0] = (mesh.NI-1)/2;
-                vox_ID[1] = (mesh.NJ-1)/2;
-                vox_ID[2] = (mesh.NK-1)/2;
-            }
-
+            // load data for new particle
+            vox_ID[0] = (x/dvox) + ((N+1)/2);
+            vox_ID[1] = (y/dvox) + ((N+1)/2);
+            vox_ID[2] = (z/dvox) + ((N+1)/2);
+            
             u = data.u[trackID];
             v = data.v[trackID];
             w = data.w[trackID];
@@ -53,7 +54,7 @@ class collision_event{
         }
 
 
-        void get_voxel_surfs(twoDmesh mesh){
+        void get_voxel_surfs(){
             x_surfs[0] = mesh.x[vox_ID[0]]; x_surfs[1] = mesh.x[vox_ID[0]+1];
             y_surfs[0] = mesh.y[vox_ID[1]]; y_surfs[1] = mesh.y[vox_ID[1]+1];
             z_surfs[0] = mesh.z[vox_ID[2]]; z_surfs[1] = mesh.z[vox_ID[2]+1];
@@ -93,12 +94,14 @@ class collision_event{
             }
         }
         
-        void update_tl(twoDmesh mesh){
-            const unsigned tl_idx = vox_ID[0] + 
-                                    vox_ID[1]*mesh.NI + 
-                                    vox_ID[2]*mesh.NI*mesh.NJ;
+        void update_tl(){
+            int tl_idx = vox_ID[0] + 
+                              vox_ID[1]*N + 
+                              vox_ID[2]*N*N;
+            assert(tl_idx < N*N*N); 
             if (rtl > s){
                 mesh.flux[tl_idx] += s / V;
+
                 // update remaining track length and particle position
                 update_pos(s);
                 rtl -= s;
@@ -118,6 +121,8 @@ class collision_event{
             vox_ID[0] += inc_vox[0];
             vox_ID[1] += inc_vox[1];
             vox_ID[2] += inc_vox[2];
+            
+            
         }
 
         void update_pos(float travel){
@@ -125,38 +130,39 @@ class collision_event{
             x += u*travel;
             y += v*travel;
             z += w*travel;
+
         }
 
-        void walk_particle(twoDmesh mesh){
-            int test = 0;
-            while (rtl > 0){
-               get_voxel_surfs(mesh);
+        void walk_particle(){
+            // break if we leave mesh
+            while ((rtl > 0) && 
+                   (vox_ID[0] < N) && 
+                   (vox_ID[1] < N) &&
+                   (vox_ID[2] < N) ){
+
+               get_voxel_surfs();
                eliminate_surfs();
                distance_to_cross();
-               update_tl(mesh);
+               update_tl();
                update_voxel_ID();
-               test++;
+              }
             }
-        }
+        
 };
 
 
-void seq_tally(int N, particleTrack col_data, twoDmesh mesh,
-                   int NI, int NJ, int NK){
+void seq_tally(int N, particleTrack col_data, twoDmesh mesh){
 
-        collision_event particle;
-        particle.calc_vox_vol(mesh);
+        collision_event particle(mesh);
                 
         for (int partID = 0; partID <col_data.Ntracks; partID++){
-            particle.start_track(partID, col_data, mesh);
-            particle.walk_particle(mesh);
+            particle.start_track(partID, col_data);
+            particle.walk_particle();
         }
         
-        
-    for (int i = 0; i<NI*NI*NI; i++){
-        std::cout << particle.class_flux[i] << std::endl;
-    }
-
+        for (int i =0; i<mesh.N*mesh.N*mesh.N; i++){
+        std::cout<< mesh.flux[i] << std::endl;
+        }        
 }
 
 
@@ -178,9 +184,9 @@ int main(int argc, char* argv[]){
     // Load particle collision history
     particleTrack dataTrack = read_array("event_history.txt");
     // generate mesh
-    twoDmesh mesh = gen_mesh(N, N, N, h, h, h);
+    twoDmesh mesh = gen_mesh(N, h);
     // start tallying
-    seq_tally(Np, dataTrack, mesh, N, N, N);
+    seq_tally(Np, dataTrack, mesh);
 
     return 0;
 }
