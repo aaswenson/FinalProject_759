@@ -43,9 +43,9 @@ class collision_event{
             y = data.y_pos[trackID];
             z = data.z_pos[trackID];
             // load data for new particle
-            vox_ID[0] = (x/dvox) + ((N+1)/2);
-            vox_ID[1] = (y/dvox) + ((N+1)/2);
-            vox_ID[2] = (z/dvox) + ((N+1)/2);
+            vox_ID[0] = N/2 + (int)x*dvox/2;
+            vox_ID[1] = N/2 + (int)y*dvox/2;
+            vox_ID[2] = N/2 + (int)z*dvox/2;
             
             u = data.u[trackID];
             v = data.v[trackID];
@@ -75,9 +75,9 @@ class collision_event{
             
             inc_vox[0] = 0; inc_vox[1] = 0; inc_vox[2] = 0;
             
-            sx = fabsf((checkx-x)/u);
-            sy = fabsf((checky-y)/v);
-            sz = fabsf((checkz-z)/w);
+            sx = (checkx-x)/u;
+            sy = (checky-y)/v;
+            sz = (checkz-z)/w;
             s = sx;
             int inc_idx = 0;
             float inc_val = u;
@@ -87,7 +87,6 @@ class collision_event{
             }else if (sz < s){ 
                 s = sz; inc_val = w; inc_idx = 2;
             }
-            
             if (rtl > s){
                 // only increment voxel if we leave the box
                 inc_vox[inc_idx] = (int)(inc_val / fabs(inc_val));
