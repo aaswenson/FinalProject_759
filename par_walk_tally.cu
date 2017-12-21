@@ -177,20 +177,20 @@ int main(int argc, char* argv[]){
         std::cout << hmesh.flux[i] << std::endl;
     }
 
-    // cudaFree(dmesh.flux);
-    // cudaFree(dmesh.x);
-    // cudaFree(dmesh.y);
-    // cudaFree(dmesh.z);
-    // cudaFree(ddata.x_pos);
-    // cudaFree(ddata.y_pos);
-    // cudaFree(ddata.z_pos);
-    // cudaFree(ddata.u);
-    // cudaFree(ddata.v);
-    // cudaFree(ddata.w);
-    // cudaFree(ddata.track_length);
-
-    //cudaFree(dmesh.flux);
-    //cudaFree(ddata);
-    // free(hmesh.flux);
+    cudaFree(dmesh.flux);
+    cudaFree(dmesh.x);
+    cudaFree(dmesh.y);
+    cudaFree(dmesh.z);
+    cudaFree(ddata.x_pos);
+    cudaFree(ddata.y_pos);
+    cudaFree(ddata.z_pos);
+    cudaFree(ddata.u);
+    cudaFree(ddata.v);
+    cudaFree(ddata.w);
+    cudaFree(ddata.track_length);
+    cudaFree(dmesh.flux);
+    
+    free(hmesh.flux);
+    
     return 0;
 }
