@@ -25,7 +25,7 @@ particleTrack AllocatePtracData(particleTrack hdata){
 twoDmesh AllocateMeshData(twoDmesh hmesh){
 	cudaError_t error;
 	twoDmesh dmesh = hmesh;
-	int size = hmesh.N * sizeof(float);
+	int size = (hmesh.N+1) * sizeof(float);
 	int sizeflux = hmesh.N*hmesh.N*hmesh.N*sizeof(float);
 
     error = cudaMalloc((void**)&dmesh.x, size);
@@ -47,7 +47,7 @@ void CopyDatatoDevice(particleTrack ddata, particleTrack hdata,
 {
     cudaError_t error;
 	unsigned int size = hdata.Ntracks * sizeof(float);
-    unsigned int meshsize = hmesh.N * sizeof(float);
+    unsigned int meshsize = (hmesh.N+1) * sizeof(float);
 	unsigned int sizeflux = hmesh.N*hmesh.N*hmesh.N*sizeof(float);
 	
 

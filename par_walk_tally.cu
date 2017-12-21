@@ -44,25 +44,25 @@ __global__  void parallel_walk(unsigned int Ngrid, unsigned int N, float* x, flo
         z_surfs[0] = z[z_idx]; z_surfs[1] = z[z_idx+1];
 
         for (int PID=0; PID<N; PID++){
-            intersect = 1;
             // get particle track length
             tl = track_length[PID];
             // inverted direction to be used in ray-box intersection check
-            dir_inv[0] = 1 / u[PID];
-            dir_inv[1] = 1 / v[PID];
-            dir_inv[2] = 1 / w[PID];
+            dir_inv[0] =  1 / u[PID];
+            dir_inv[1] =  1 / v[PID];
+            dir_inv[2] =  1 / w[PID];
+
             // default assumption is we cross into box
             x_0 = x_pos[PID]; y_0 = y_pos[PID]; z_0 = z_pos[PID];
             
-            // x goes first
-            tmin = (x_surfs[0] - x_0) * dir_inv[0];
-            tmax = (x_surfs[1] - x_0) * dir_inv[0];
             
+            // x goes first
+            float txmin = (x_surfs[0] - x_0) * dir_inv[0];
+            float txmax = (x_surfs[1] - x_0) * dir_inv[0];
             // if necessary swap within x
-            if (tmax < tmin){
-                savet = tmax;
-                tmax = tmin;
-                tmin = savet;
+            if (txmax < txmin){
+                savet = txmax;
+                txmax = txmin;
+                txmin = savet;
             }
             // distance to cross in y
             float tymin = (y_surfs[0] - y_0) * dir_inv[1];
@@ -73,19 +73,6 @@ __global__  void parallel_walk(unsigned int Ngrid, unsigned int N, float* x, flo
                 tymax = tymin;
                 tymin = savet;
             }
-
-            if ((tmin > tymax) || (tymin > tmax)){
-                intersect = 0;
-            }
-
-            // swap in between x and y if necesary
-            if (tymin > tmin){
-                tmin = tymin;
-            }
-            if (tymax < tmax){
-                tmax = tymax;
-            }
-            
             // distance to cross in z
             float tzmin = (z_surfs[0] - z_0) * dir_inv[2];
             float tzmax = (z_surfs[1] - z_0) * dir_inv[2];
@@ -96,32 +83,24 @@ __global__  void parallel_walk(unsigned int Ngrid, unsigned int N, float* x, flo
                 tzmin = savet;
             }
 
-            if ((tmin > tzmax) || (tzmin > tmax)){
-                intersect  = 0;
-            }
-
-            // swap in between y and z if necessary
-            if (tzmin > tmin){
-                tmin = tzmin;
-            }
-            if (tzmax < tmax){
-                tmax = tzmax;
-            }
+            // maximum min t is the distance to box entry
+            tmin = fmax(txmin, fmax(tymin, tzmin));
+            // minimum max t is the distance to box exit
+            tmax = fmin(txmax, fmin(tymax, tzmax));
 
             // select cases only where particle was in voxel
-            if ( tl > tmin && intersect == 1){
+            if ( tmin < tmax && tmax > 0 && tl > tmin){
                 // particle through entire voxel
-                if (tl > tmax && tmin > 0){gflux[tl_ID] += fabsf(tmax - tmin) / V;}
+                if (tl > tmax && tmin > 0){gflux[tl_ID] += (tmax - tmin) / V;}
                 // particle starts inside voxel, leaves
-                if (tmin < 0 && tl > tmax){gflux[tl_ID] += fabsf(tmax) / V;}
-                // particle starts outside voxel, end insid
-                if (tmax > tl && tmin > 0){gflux[tl_ID] += fabsf(tl - tmin) / V;}
+                if (tmin < 0 && tl > tmax){gflux[tl_ID] += tmax / V;}
+                // particle starts outside voxel, end inside
+                if (tmax > tl && tmin > 0){gflux[tl_ID] += (tl - tmin) / V;}
                 
                 // particle starts inside, ends inside
                 if (tmax > tl && tmin < 0){gflux[tl_ID] += tl / V;}
-
             }
-        } 
+        }
     }
 }
 

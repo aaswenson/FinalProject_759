@@ -35,7 +35,7 @@ seq_tally : seq_tally.cpp
 	@ $(CXX) $(CXXSTD) -g -I$(Linked_Libs) -L$(Linked_Libs) -o $@ $< $(LDFLAGS) $(OPT)
 
 par_walk: par_walk_tally.cu 
-	nvcc -o par_walk_tally $(OPT) $(CXXSTD) par_walk_tally.cu
+	nvcc -g -o par_walk_tally $(OPT) $(CXXSTD) par_walk_tally.cu
 
 # TODO: add targets for building executables
 
