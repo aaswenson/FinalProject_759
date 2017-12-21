@@ -8,10 +8,10 @@
 #include <cuda.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <gen_mesh.cpp>
-#include <random_walk.cpp>
-#include <read_methods.cpp>
-#include <cuda_prep.cu>
+#include "gen_mesh.cpp"
+#include "random_walk.cpp"
+#include "read_methods.cpp"
+#include "cuda_prep.cu"
 
     
 __global__  void parallel_walk(unsigned int Ngrid, unsigned int N, float* x, float* y, float* z,
@@ -31,7 +31,6 @@ __global__  void parallel_walk(unsigned int Ngrid, unsigned int N, float* x, flo
     float tmin, tmax, savet;
     float x_surfs[2], y_surfs[2], z_surfs[2];
     float V = h*h*h; 
-    int intersect;
     gflux[tl_ID] = 0;
 
 

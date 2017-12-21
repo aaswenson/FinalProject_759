@@ -6,9 +6,9 @@
 #include <vector>
 #include <fstream>
 #include <iomanip>
-#include <gen_mesh.cpp>
-#include <random_walk.cpp>
-#include <read_methods.cpp>
+#include "gen_mesh.cpp"
+#include "random_walk.cpp"
+#include "read_methods.cpp"
 
 class collision_event{
     public:
