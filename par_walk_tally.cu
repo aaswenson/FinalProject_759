@@ -104,33 +104,14 @@ __global__  void parallel_walk(unsigned int Ngrid, unsigned int N, float* x, flo
     }
 }
 
-
-int main(int argc, char* argv[]){
-
-    if (argc != 4){
-        std::cout << "Usage: N_particles N h" << std::endl;
-        return 1;
-    }
-    const unsigned Np = atoi(argv[1]);
-    const unsigned N = atof(argv[2]);
-    const float h = atof(argv[3]); 
-    // size of flux memory
-    int flux_size = N*N*N*sizeof(float);
-
-    if (N%2==0){
-        std::cout << "Mesh dimensions must be odd!" << std::endl;
-        return 1;
-    }
-    // generate track histories
-    execute_walk(Np);
-    // Load particle collision history
-    particleTrack hdata = read_array("event_history.txt");
-    // generate mesh
-    twoDmesh hmesh = gen_mesh(N, h);
+void par_tally(twoDmesh hmesh, particleTrack hdata, int N, float h){
     
     particleTrack ddata = AllocatePtracData(hdata);
     twoDmesh dmesh = AllocateMeshData(hmesh);
     CopyDatatoDevice(ddata, hdata, dmesh, hmesh);
+    
+    // size of flux memory
+    int flux_size = N*N*N*sizeof(float);
 
     int max_dim = 10;
     int grid_dim = (int) N*N*N/1000+1; //N/max_dim + 1;
@@ -152,9 +133,6 @@ int main(int argc, char* argv[]){
     cudaMemcpy(hmesh.flux, dmesh.flux, flux_size, 
 			cudaMemcpyDeviceToHost);
     
-    for(int i=0;i<N*N*N;i++){
-        std::cout << hmesh.flux[i] << std::endl;
-    }
 
     cudaFree(dmesh.flux);
     cudaFree(dmesh.x);
@@ -168,6 +146,37 @@ int main(int argc, char* argv[]){
     cudaFree(ddata.w);
     cudaFree(ddata.track_length);
     cudaFree(dmesh.flux);
+
+
+}
+
+
+int main(int argc, char* argv[]){
+
+    if (argc != 4){
+        std::cout << "Usage: N_particles N h" << std::endl;
+        return 1;
+    }
+    const unsigned Np = atoi(argv[1]);
+    const unsigned N = atof(argv[2]);
+    const float h = atof(argv[3]); 
+
+    if (N%2==0){
+        std::cout << "Mesh dimensions must be odd!" << std::endl;
+        return 1;
+    }
+    // generate track histories
+    execute_walk(Np);
+    // Load particle collision history
+    particleTrack hdata = read_array("event_history.txt");
+    // generate mesh
+    twoDmesh hmesh = gen_mesh(N, h);
+    
+    par_tally(hmesh, hdata, N, h); 
+    
+    for(int i=0;i<N*N*N;i++){
+        std::cout << hmesh.flux[i] << std::endl;
+    }
     
     free(hmesh.flux);
     
