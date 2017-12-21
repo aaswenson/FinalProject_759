@@ -1,0 +1,107 @@
+
+            // x goes first
+            tmin = (x_surfs[0] - x_0) * dir_inv[0];
+            tmax = (x_surfs[1] - x_0) * dir_inv[0];
+            
+            // if necessary swap within x
+            if (tmax < tmin){
+                savet = tmax;
+                tmax = tmin;
+                tmin = savet;
+            }
+            // distance to cross in y
+            float tymin = (y_surfs[0] - y_0) * dir_inv[1];
+            float tymax = (y_surfs[1] - y_0) * dir_inv[1];
+            // if necessary swap within y
+            if (tymax < tymin){
+                savet = tymax;
+                tymax = tymin;
+                tymin = savet;
+            }
+
+            if ((tmin > tymax) || (tymin > tmax)){
+                intersect = 0;
+            }
+
+            // swap in between x and y if necesary
+            if (tymin > tmin){
+                tmin = tymin;
+            }
+            if (tymax < tmax){
+                tmax = tymax;
+            }
+            
+            // distance to cross in z
+            float tzmin = (z_surfs[0] - z_0) * dir_inv[2];
+            float tzmax = (z_surfs[1] - z_0) * dir_inv[2];
+            // if necessary swap within z
+            if (tzmax < tzmin){
+                savet = tzmax;
+                tzmax = tzmin;
+                tzmin = savet;
+            }
+
+            if ((tmin > tzmax) || (tzmin > tmax)){
+                intersect  = 0;
+            }
+
+            // swap in between y and z if necessary
+            if (tzmin > tmin){
+                tmin = tzmin;
+            }
+            if (tzmax < tmax){
+                tmax = tzmax;
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            // x goes first
+            float txmin = (x_surfs[0] - x_0) * dir_inv[0];
+            float txmax = (x_surfs[1] - x_0) * dir_inv[0];
+            // distance to cross in y
+            float tymin = (y_surfs[0] - y_0) * dir_inv[1];
+            float tymax = (y_surfs[1] - y_0) * dir_inv[1];
+            // distance to cross in z
+            float tzmin = (z_surfs[0] - z_0) * dir_inv[2];
+            float tzmax = (z_surfs[1] - z_0) * dir_inv[2];
+            
+            // if necessary swap within x,y,z
+            if (txmax < txmin){
+                savet = txmax;
+                txmax = txmin;
+                txmin = savet;
+            }
+            if (tymax < tymin){
+                savet = tymax;
+                tymax = tymin;
+                tymin = savet;
+            }
+            if (tzmax < tzmin){
+                savet = tzmax;
+                tzmax = tzmin;
+                tzmin = savet;
+            }
+
+            // get min of tmax/tmin for x,y,z
+            tmax = fminf(txmax, fminf(tymax, tzmax));
+            tmin = fminf(txmin, fminf(tymin, tzmin));
+
+            if( (tmin > tymax) || (tymin > tmax)){intersect = 0;}
+            if( (tmin > tzmax) || (tzmin > tmax)){intersect = 0;}
+            if((tmin < 0 && tmax < 0)){intersect = 0;}
+                        

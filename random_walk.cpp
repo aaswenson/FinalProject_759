@@ -7,7 +7,7 @@
 #include <random>
 
 #define SPHERE_RADIUS 100
-#define MEAN_FREE_PATH 50
+#define MEAN_FREE_PATH 20
 #define SEED 123
 #define SET_COL 15
 

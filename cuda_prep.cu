@@ -1,5 +1,8 @@
+
+#include <cuda.h>
+
 // Allocate memory for ptrac data
-particleTrack AllocatePtracData(const particleTrack hdata){
+particleTrack AllocatePtracData(particleTrack hdata){
 	cudaError_t error;
 	particleTrack data = hdata;
 	int size = hdata.Ntracks * sizeof(float);
@@ -19,7 +22,7 @@ particleTrack AllocatePtracData(const particleTrack hdata){
 }
 
 // Allocate memory for mesh data
-twoDmesh AllocateMeshData(const twoDmesh hmesh){
+twoDmesh AllocateMeshData(twoDmesh hmesh){
 	cudaError_t error;
 	twoDmesh dmesh = hmesh;
 	int sizeI = hmesh.NI * sizeof(float);
@@ -28,9 +31,9 @@ twoDmesh AllocateMeshData(const twoDmesh hmesh){
 	int sizeflux = hmesh.NI*hmesh.NJ*hmesh.NK*sizeof(float);
 
     error = cudaMalloc((void**)&dmesh.x, sizeI);
-	error = cudaMalloc((void**)&dmesh.y, sizeJ);
-	error = cudaMalloc((void**)&dmesh.z, sizeK);
-	error = cudaMalloc((void**)&dmesh.flux, sizeflux);
+	cudaMalloc((void**)&dmesh.y, sizeJ);
+	cudaMalloc((void**)&dmesh.z, sizeK);
+	cudaMalloc((void**)&dmesh.flux, sizeflux);
 	
     if (error != cudaSuccess)
 	{
@@ -41,53 +44,46 @@ twoDmesh AllocateMeshData(const twoDmesh hmesh){
 }
 
 // copy the ptrac and mesh data to the device
-void CopyDatatoDevice(particleTrack data, const particleTrack hdata,
-                      twoDmesh dmesh, const twoDmesh hmesh)
+void CopyDatatoDevice(particleTrack ddata, particleTrack hdata,
+                      twoDmesh dmesh, twoDmesh hmesh)
 {
-	int size = hdata.Ntracks * sizeof(float);
-	int sizeI = hmesh.NI * sizeof(float);
-	int sizeJ = hmesh.NJ * sizeof(float);
-	int sizeK = hmesh.NK * sizeof(float);
-	int sizeflux = hmesh.NI*hmesh.NJ*hmesh.NK*sizeof(float);
+    cudaError_t error;
+	unsigned int size = hdata.Ntracks * sizeof(float);
+    unsigned int meshsize = hmesh.NI * sizeof(float);
+	unsigned int sizeflux = hmesh.NI*hmesh.NJ*hmesh.NK*sizeof(float);
 	
-    // ptrac data
-    data.x_pos = hdata.x_pos;
-	data.y_pos = hdata.y_pos;
-	data.z_pos = hdata.z_pos;
-	data.u = hdata.u;
-	data.v = hdata.v;
-	data.w = hdata.w;
-	data.track_length = hdata.track_length;
-    
-    // mesh data
-    dmesh.x = hmesh.x; dmesh.y = hmesh.y; dmesh.z = hmesh.z;
-    dmesh.flux = hmesh.flux;
 
     // copy all data to device
     // Ptrac Data
-	cudaMemcpy(data.x_pos, hdata.x_pos, size, 
+	error = cudaMemcpy(ddata.x_pos, hdata.x_pos, size, 
 			cudaMemcpyHostToDevice);
-	cudaMemcpy(data.y_pos, hdata.y_pos, size, 
+	cudaMemcpy(ddata.y_pos, hdata.y_pos, size, 
+	    cudaMemcpyHostToDevice);
+	cudaMemcpy(ddata.z_pos, hdata.z_pos, size, 
+	    cudaMemcpyHostToDevice);
+	cudaMemcpy(ddata.u, hdata.u, size, 
+	    cudaMemcpyHostToDevice);
+	cudaMemcpy(ddata.v, hdata.v, size, 
 			cudaMemcpyHostToDevice);
-	cudaMemcpy(data.z_pos, hdata.z_pos, size, 
+	cudaMemcpy(ddata.w, hdata.w, size, 
 			cudaMemcpyHostToDevice);
-	cudaMemcpy(data.u, hdata.u, size, 
-			cudaMemcpyHostToDevice);
-	cudaMemcpy(data.v, hdata.v, size, 
-			cudaMemcpyHostToDevice);
-	cudaMemcpy(data.w, hdata.w, size, 
-			cudaMemcpyHostToDevice);
-	cudaMemcpy(data.track_length, hdata.track_length, size, 
+	cudaMemcpy(ddata.track_length, hdata.track_length, size, 
 			cudaMemcpyHostToDevice);
     // Mesh Data
-	cudaMemcpy(dmesh.x, hmesh.x, sizeI, 
+    cudaMemcpy(dmesh.x, hmesh.x, meshsize, 
 			cudaMemcpyHostToDevice);
-	cudaMemcpy(dmesh.y, hmesh.y, sizeJ, 
+	cudaMemcpy(dmesh.y, hmesh.y, meshsize, 
 			cudaMemcpyHostToDevice);
-	cudaMemcpy(dmesh.z, hmesh.z, sizeK, 
+	cudaMemcpy(dmesh.z, hmesh.z, meshsize, 
 			cudaMemcpyHostToDevice);
 	cudaMemcpy(dmesh.flux, hmesh.flux, sizeflux, 
 			cudaMemcpyHostToDevice);
+    if (error != cudaSuccess)
+	{
+		printf("cudaMemcpy returned error code %d, line(%d)\n", error, __LINE__);
+		exit(EXIT_FAILURE);
+	}
+
 }
 
 
