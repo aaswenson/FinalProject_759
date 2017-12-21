@@ -15,7 +15,7 @@
 
     
 __global__  void parallel_walk(unsigned int Ngrid, unsigned int N, float* x, float* y, float* z,
-                               float dx, float dy, float dz, float* gflux, 
+                               float h, float* gflux, 
                                float* x_pos, float* y_pos, float* z_pos, 
                                float* u, float* v, float* w, 
                                float* track_length){
@@ -30,7 +30,7 @@ __global__  void parallel_walk(unsigned int Ngrid, unsigned int N, float* x, flo
     float dir_inv[3];
     float tmin, tmax, savet;
     float x_surfs[2], y_surfs[2], z_surfs[2];
-    float V = dx*dy*dz; 
+    float V = h*h*h; 
     int intersect;
     gflux[tl_ID] = 0;
 
@@ -135,17 +135,10 @@ int main(int argc, char* argv[]){
     const unsigned Np = atoi(argv[1]);
     const unsigned N = atof(argv[2]);
     const float h = atof(argv[3]); 
-    // uniform mesh
-    const unsigned NI = N;
-    const unsigned NJ = N;
-    const unsigned NK = N;
-    const float DX = h;
-    const float DY = h;
-    const float DZ = h;
     // size of flux memory
     int flux_size = N*N*N*sizeof(float);
 
-    if (NI%2 == 0 || NJ%2 == 0 || NK%2 == 0){
+    if (N%2==0){
         std::cout << "Mesh dimensions must be odd!" << std::endl;
         return 1;
     }
@@ -154,7 +147,7 @@ int main(int argc, char* argv[]){
     // Load particle collision history
     particleTrack hdata = read_array("event_history.txt");
     // generate mesh
-    twoDmesh hmesh = gen_mesh(NI, NJ, NK, DX, DY, DZ);
+    twoDmesh hmesh = gen_mesh(N, h);
     
     particleTrack ddata = AllocatePtracData(hdata);
     twoDmesh dmesh = AllocateMeshData(hmesh);
@@ -174,7 +167,7 @@ int main(int argc, char* argv[]){
     
 
     parallel_walk<<<dimGrid,dimBlock>>> (N, ddata.Ntracks, dmesh.x, dmesh.y, dmesh.z, 
-            DX, DY, DZ, dmesh.flux, ddata.x_pos, ddata.y_pos, ddata.z_pos,
+            h, dmesh.flux, ddata.x_pos, ddata.y_pos, ddata.z_pos,
          ddata.u, ddata.v, ddata.w, ddata.track_length);
 
     cudaMemcpy(hmesh.flux, dmesh.flux, flux_size, 

@@ -30,17 +30,9 @@ debug : $(EXEC)
 
 all : $(EXEC) test_execs
 
-random_walk : random_walk.cpp
-	@ echo Building $@...
-	@ $(CXX) $(CXXSTD) -o $@ $< $(LDFLAGS) $(OPT)
-
 seq_tally : seq_tally.cpp
 	@ echo Building $@...
 	@ $(CXX) $(CXXSTD) -g -I$(Linked_Libs) -L$(Linked_Libs) -o $@ $< $(LDFLAGS) $(OPT)
-
-mesh_ex : StructuredMeshSimple.cpp
-	@ echo Building $@...
-	@ $(CXX) $(CXXSTD) -I$(Linked_Libs) -L$(Linked_Libs) -o $@ $< $(LDFLAGS) $(OPT) 
 
 par_walk: par_walk_tally.cu 
 	nvcc -o par_walk_tally $(OPT) $(CXXSTD) par_walk_tally.cu
@@ -49,4 +41,4 @@ par_walk: par_walk_tally.cu
 
 .PHONY: clean
 clean:
-	@ rm -f $(EXEC) $(OBJS) *.out
+	@ rm -f $(EXEC) $(OBJS) *.out event_history.txt

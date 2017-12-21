@@ -6,8 +6,8 @@
 #include <iomanip>
 #include <random>
 
-#define SPHERE_RADIUS 100
-#define MEAN_FREE_PATH 20
+#define SPHERE_RADIUS 10
+#define MEAN_FREE_PATH 1
 #define SEED 123
 #define SET_COL 15
 
