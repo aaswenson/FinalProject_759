@@ -3,10 +3,10 @@
 \section{Introduction}
     Monte Carlo simulation is useful for performing accurate analysis on complex
 systems. In the context of nuclear physics, particles are tracked through a
-geometry and the collision histories are collected. These track lengths are only useful in
-context. Analysts often discretize geometries and apply response functions to
-voxels to gain insight about system behavior. CPU codes have traditionally
+geometry and the collision histories are collected. These collision histories
+are only useful in context. Analysts often discretize geometries and apply response functions to voxels to gain insight about system behavior. CPU codes have traditionally
 filled this role. The codes track each particle through a user-defined mesh,
 tallying track-length contributions for each voxel the particle passes through.
 This is traditionally a slow calculation that impacts time to solution. We have
-a attempted an accelerated solution using GPUs.
+attempted an accelerated solution using GPUs.
+

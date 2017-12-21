@@ -1,2 +1,17 @@
 %%%%%%%%%%%%%%% Parallel methods %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Parallel Methods}
+The parallel code takes advantage of the GPU's unique computing capability by
+completely restructuring the calculation strategy. Instead of looping through
+every particle and tracking it through space, the parallel code assigns a thread
+to every voxel in space. Each thread performs a line-box intersection qeuery,
+tallying the particle contribution where appropriate. Every thread must check
+every particle.
+
+Stuff about how the algorithm works.
+
+The philosophy of this approach is to make the compute time independent of
+particle mean free path. Since every thread checks every particle at one point
+in space, the compute time is a fixed function of mesh size and the number of
+problem particles. Even if the particles traverse a large number of voxels, The
+same 6 calculations are performed per particle, per voxel.
+

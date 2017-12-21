@@ -2,5 +2,33 @@
 \section{Sequential Methods}
 
 The sequential code tracks each particle through a uniform, structured,
-cartesian mesh. As each particle passes through mesh voxels, it contributes to
-the voxels' track length. 
+cartesian mesh. As each particle passes through mesh voxels, they contribute a
+portion of their track length to the flux tally of the voxel. This process
+requires at minimum three distance to crossing calculations per voxel. Equation
+\ref{eqn:cross_plane} is the distance to plane crossing equation.
+
+\begin{equation}
+\label{eqn:cross_plane}
+s = \frac{X_i - \vec{r}_i}{\vec{v}_i}
+\end{equation}
+
+Where $X_i$ is a normal plane in (x,y,z) space, $\vec{r}_i$ is the particle's
+initial position, and $\vec{v}_i$ is the unit velocity vector.
+
+Each voxel requires at minimum, three surface checks for crossing. Surfaces with
+signs opposite of their respective particle velocity component can be neglected,
+if the particle is traveling away from a surface, it will never cross that it.
+Once the three eligible surfaces are selected, the minimum distance to crossing
+is selected. 
+
+The minimum distance to crossing is used to contribute particle track length to
+the volume-averaged voxel flux. If the particle track is shorter than distance
+to crossing, the contribution is adjusted accordingly.
+
+The sequential code computes the track-length contribution on the mesh from
+every particle history in serial. This is an computationally expensive process,
+especially when particles have a large mean free path relative to the mesh
+spacing. When this is the case, single tracks traverse a large number of mesh
+points, each of which require (at minimum) three surface crossing calculations.
+
+
