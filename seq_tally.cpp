@@ -26,6 +26,8 @@ class collision_event{
         float y_surfs[2];
         float z_surfs[2];
 
+        float class_flux[27];
+
         // remaining track length
         float rtl;
         
@@ -92,19 +94,18 @@ class collision_event{
         }
         
         void update_tl(twoDmesh mesh){
+            const unsigned tl_idx = vox_ID[0] + 
+                                    vox_ID[1]*mesh.NI + 
+                                    vox_ID[2]*mesh.NI*mesh.NJ;
             if (rtl > s){
-                mesh.flux[vox_ID[0] + 
-                      vox_ID[1]*mesh.NI + 
-                      vox_ID[2]*mesh.NI*mesh.NJ] = s / V;
+                mesh.flux[tl_idx] += s / V;
                 // update remaining track length and particle position
                 update_pos(s);
                 rtl -= s;
             }
             else{
                 // expend remaining track length inside voxel
-                mesh.flux[vox_ID[0] + 
-                      vox_ID[1]*mesh.NI + 
-                      vox_ID[2]*mesh.NI*mesh.NJ] = rtl / V;
+                mesh.flux[tl_idx]  += rtl / V; 
                 // update position
                 update_pos(rtl);
                 rtl = 0;
@@ -149,35 +150,37 @@ void seq_tally(int N, particleTrack col_data, twoDmesh mesh,
         for (int partID = 0; partID <col_data.Ntracks; partID++){
             particle.start_track(partID, col_data, mesh);
             particle.walk_particle(mesh);
-        }       
+        }
+        
+        
+    for (int i = 0; i<NI*NI*NI; i++){
+        std::cout << particle.class_flux[i] << std::endl;
+    }
+
 }
 
 
 int main(int argc, char* argv[]){
 
-    if (argc != 8){
+    if (argc != 4){
         std::cout << "Usage: N_particles Nx Ny Nz hx hy hz" << std::endl;
         return 1;
     }
-    const unsigned N = atoi(argv[1]);
-    const unsigned NI = atof(argv[2]);
-    const unsigned NJ = atof(argv[3]);
-    const unsigned NK = atof(argv[4]);
-    const float DX = atof(argv[5]); 
-    const float DY = atof(argv[6]); 
-    const float DZ = atof(argv[7]);
-    if (NI%2 == 0 || NJ%2 == 0 || NK%2 == 0){
+    const unsigned Np = atoi(argv[1]);
+    const unsigned N = atoi(argv[2]);
+    const float h = atof(argv[3]); 
+    if (N%2==0){
         std::cout << "Mesh dimensions must be odd!" << std::endl;
         return 1;
     }
     // generate track histories
-    execute_walk(N);
+    execute_walk(Np);
     // Load particle collision history
     particleTrack dataTrack = read_array("event_history.txt");
     // generate mesh
-    twoDmesh mesh = gen_mesh(NI, NJ, NK, DX, DY, DZ);
+    twoDmesh mesh = gen_mesh(N, N, N, h, h, h);
     // start tallying
-    seq_tally(N, dataTrack, mesh, NI, NJ, NK);
-    
+    seq_tally(Np, dataTrack, mesh, N, N, N);
+
     return 0;
 }
