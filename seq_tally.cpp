@@ -25,7 +25,7 @@ class collision_event{
         float x, y, z;
         float checkx, checky, checkz;
         float u, v, w;
-        float s;
+        float s, sx, sy, sz;
         int inc_vox[3];
         int vox_ID[3];
         unsigned int i, j, k;
@@ -75,9 +75,9 @@ class collision_event{
             
             inc_vox[0] = 0; inc_vox[1] = 0; inc_vox[2] = 0;
             
-            float sx = (checkx-x)/u;
-            float sy = (checky-y)/v;
-            float sz = (checkz-z)/w;
+            sx = fabsf((checkx-x)/u);
+            sy = fabsf((checky-y)/v);
+            sz = fabsf((checkz-z)/w);
             s = sx;
             int inc_idx = 0;
             float inc_val = u;
@@ -98,15 +98,14 @@ class collision_event{
             int tl_idx = vox_ID[0] + 
                               vox_ID[1]*N + 
                               vox_ID[2]*N*N;
-            assert(tl_idx < N*N*N); 
             if (rtl > s){
                 mesh.flux[tl_idx] += s / V;
 
                 // update remaining track length and particle position
                 update_pos(s);
                 rtl -= s;
-            }
-            else{
+            
+            }else{
                 // expend remaining track length inside voxel
                 mesh.flux[tl_idx]  += rtl / V; 
                 // update position
