@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <iostream>
 #include <algorithm>
 #include <cstdio>
@@ -6,32 +7,28 @@
 #include <fstream>
 #include <iomanip>
 #include <gen_mesh.cpp>
-
-// particle track data
-struct particleTrack{
-        float* x_pos;
-        float* y_pos;
-        float* z_pos;
-        float* u;
-        float* v;
-        float* w;
-        float* track_length;
-        float* energy;
-        unsigned int Ntracks;
-};
+#include <random_walk.cpp>
+#include <read_methods.cpp>
 
 class collision_event{
-    
     public:
+        twoDmesh mesh;
+        collision_event(twoDmesh load_mesh){
+            mesh = load_mesh;
+            N = mesh.N;
+            dvox = mesh.h;
+            V = dvox*dvox*dvox;
+         }
+        unsigned int N;
+        float dvox; 
         float V;
         float x, y, z;
         float checkx, checky, checkz;
         float u, v, w;
-        float s;
+        float s, sx, sy, sz;
         int inc_vox[3];
         int vox_ID[3];
         unsigned int i, j, k;
-
         // place to store voxel surface data
         float x_surfs[2];
         float y_surfs[2];
@@ -40,26 +37,23 @@ class collision_event{
         // remaining track length
         float rtl;
         
-        void calc_vox_vol(twoDmesh mesh){V = mesh.dx*mesh.dy*mesh.dz;}
-
-        void start_particle(unsigned int trackID, 
-                            particleTrack data, twoDmesh mesh){
-            
-            // load data for new particle (launched from 0,0,0)
-            vox_ID[0] = (mesh.NI-1)/2; 
-            vox_ID[1] = (mesh.NJ-1)/2; 
-            vox_ID[2] = (mesh.NK-1)/2;
+        void start_track(unsigned int trackID, particleTrack data){
             
             x = data.x_pos[trackID];
             y = data.y_pos[trackID];
             z = data.z_pos[trackID];
+            // load data for new particle
+            vox_ID[0] = (int)((floor(x/(dvox/2)) + N)/2);
+            vox_ID[1] = (int)((floor(y/(dvox/2)) + N)/2);
+            vox_ID[2] = (int)((floor(z/(dvox/2)) + N)/2);
             u = data.u[trackID];
             v = data.v[trackID];
             w = data.w[trackID];
             rtl = data.track_length[trackID];
         }
 
-        void get_voxel_surfs(twoDmesh mesh){
+
+        void get_voxel_surfs(){
             x_surfs[0] = mesh.x[vox_ID[0]]; x_surfs[1] = mesh.x[vox_ID[0]+1];
             y_surfs[0] = mesh.y[vox_ID[1]]; y_surfs[1] = mesh.y[vox_ID[1]+1];
             z_surfs[0] = mesh.z[vox_ID[2]]; z_surfs[1] = mesh.z[vox_ID[2]+1];
@@ -77,161 +71,122 @@ class collision_event{
         void distance_to_cross(){
             // get distance to crossing for each of the three eligible surfaces
             // create the transformation vector to increment voxel_ID
+            
             inc_vox[0] = 0; inc_vox[1] = 0; inc_vox[2] = 0;
-            int inc_idx = 0;
-            float inc_val = u;
             
-            s = (checkx-x)/u;
+            sx = (checkx-x)/u;
+            sy = (checky-y)/v;
+            sz = (checkz-z)/w;
             
-            if (s > (checky-y)/v){ 
-                s = (checky-y)/v;
-                inc_val = v;
-                inc_idx = 1;
+            s = std::min(sx, std::min(sy, sz));
+
+            if (rtl > s){
+                if (sx == s){inc_vox[0] = (u > 0) ? 1:-1;}
+                if (sy == s){inc_vox[1] = (v > 0) ? 1:-1;}
+                if (sz == s){inc_vox[2] = (w > 0) ? 1:-1;}
             }
-            if (s > (checkz-z)/w){
-                s = (checkz-z)/w;
-                inc_val = w;
-                inc_idx = 2;
-            }
-            inc_vox[inc_idx] = inc_val / fabs(inc_val);
         }
         
-        void update_tl(twoDmesh mesh){
+        void update_tl(){
+            int tl_idx = vox_ID[0] + 
+                              vox_ID[1]*N + 
+                              vox_ID[2]*N*N;
             if (rtl > s){
-                mesh.flux[vox_ID[0] + 
-                      vox_ID[1]*mesh.NJ + 
-                      vox_ID[2]*mesh.NJ*mesh.NK] = s / V;
-                // update remaining track length
+                mesh.flux[tl_idx] += s / V;
+
+                // update remaining track length and particle position
+                update_pos(s);
                 rtl -= s;
-            }
-            else{
+            
+            }else{
                 // expend remaining track length inside voxel
-                mesh.flux[vox_ID[0] + 
-                      vox_ID[1]*mesh.NJ + 
-                      vox_ID[2]*mesh.NJ*mesh.NK] = rtl / V;
+                mesh.flux[tl_idx]  += rtl / V; 
+                // update position
+                update_pos(rtl);
+                rtl = 0;
             }
+            assert(mesh.flux[tl_idx] > 0);
         }
 
         void update_voxel_ID(){
             // increment the voxel ID based on the surface crossed upon voxel
             // exit
-            std::transform(&inc_vox[0], &inc_vox[2], 
-                           &vox_ID[0], 
-                           &vox_ID[0], 
-                           std::plus<int>());
+            vox_ID[0] += inc_vox[0];
+            vox_ID[1] += inc_vox[1];
+            vox_ID[2] += inc_vox[2];
+            
+            
         }
 
-        void update_pos(){
+        void update_pos(float travel){
             // update the x,y,z position
-            x += u*s;
-            y += v*s;
-            z += w*s;
+            x += u*travel;
+            y += v*travel;
+            z += w*travel;
+
         }
 
+        void walk_particle(){
+            // break if we leave mesh
+            while ((rtl > 0) && 
+                   (vox_ID[0] < N) && 
+                   (vox_ID[1] < N) &&
+                   (vox_ID[2] < N) ){
+
+               get_voxel_surfs();
+               eliminate_surfs();
+               distance_to_cross();
+               update_tl();
+               update_voxel_ID();
+              }
+            }
         
 };
 
-// particle track file length 
-int file_len(const char* filename){
 
-    // file instance
-    std::fstream fp;
+void seq_tally(int N, particleTrack col_data, twoDmesh mesh){
 
-    // open file
-    fp.open(filename);
-
-    std::string line;
-    int len = 0;
-    // read the number of lines in file
-    while (std::getline(fp, line)){
-        ++len;
-    }
-
-    return len;
-}
-
-particleTrack read_array(const char* filename) {
-
-    // create instance of particle Track 
-    particleTrack dataTrack;
-
-    // memory allocation
-    int len = file_len(filename);
-    dataTrack.x_pos = (float*) malloc(len * sizeof(float));
-    dataTrack.y_pos = (float*) malloc(len * sizeof(float));
-    dataTrack.z_pos = (float*) malloc(len * sizeof(float));
-    dataTrack.u = (float*) malloc(len * sizeof(float));
-    dataTrack.v = (float*) malloc(len * sizeof(float));
-    dataTrack.w = (float*) malloc(len * sizeof(float));
-    dataTrack.track_length = (float*) malloc(len * sizeof(float));
-    dataTrack.energy = (float*) malloc(len * sizeof(float));
-
-    // file instance
-    std::fstream fp;
-
-    // open file
-    fp.open(filename);
-    
-    // save number of tracks
-    dataTrack.Ntracks = len;
-
-    // read columns from file 
-    unsigned i = 0;
-    while (!fp.eof()) {
-      fp >> dataTrack.x_pos[i] >> 
-            dataTrack.y_pos[i] >> 
-            dataTrack.z_pos[i] >> 
-            dataTrack.u[i] >> 
-            dataTrack.v[i] >> 
-            dataTrack.w[i] >> 
-            dataTrack.track_length[i] >> 
-            dataTrack.energy[i];
-      i++;
-    }
-
-    // close file
-    fp.close();
-
-    return dataTrack;
-}
-
-void seq_tally(particleTrack col_data, twoDmesh mesh,
-                   int NI, int NJ, int NK){
-
-        collision_event particle;
-        particle.calc_vox_vol(mesh);
-        particle.start_particle(0, col_data, mesh); 
-        particle.get_voxel_surfs(mesh);
-        particle.eliminate_surfs();
-        particle.distance_to_cross();
-        particle.update_tl(mesh);
-        particle.update_voxel_ID();
-        particle.update_pos();
+        collision_event particle(mesh);
+                
+        for (int partID = 0; partID <col_data.Ntracks; partID++){
+            if(abs(col_data.x_pos[partID]) < abs(mesh.x[0]) && 
+               abs(col_data.y_pos[partID]) < abs(mesh.y[0]) &&
+               abs(col_data.z_pos[partID]) < abs(mesh.z[0])){
+               particle.start_track(partID, col_data);
+               particle.walk_particle();
+            }
+            //else{
+            
+           // }
+        }
+        
+        for (int i =0; i<mesh.N*mesh.N*mesh.N; i++){
+        std::cout<< mesh.flux[i] << std::endl;
+        }        
 }
 
 
 int main(int argc, char* argv[]){
 
-    if (argc != 7){
-        std::cout << "Usage: Nx Ny Nz hx hy hz" << std::endl;
+    if (argc != 4){
+        std::cout << "Usage: N_particles Nx Ny Nz hx hy hz" << std::endl;
         return 1;
     }
-    const unsigned NI = atof(argv[1]);
-    const unsigned NJ = atof(argv[2]);
-    const unsigned NK = atof(argv[3]);
-    const float DX = atof(argv[4]); 
-    const float DY = atof(argv[5]); 
-    const float DZ = atof(argv[6]);
-    const float X0 = atof(argv[6]);
-    const float Y0 = atof(argv[6]);
-    const float Z0 = atof(argv[6]);
-    
+    const unsigned Np = atoi(argv[1]);
+    const unsigned N = atoi(argv[2]);
+    const float h = atof(argv[3]); 
+    if (N%2==0){
+        std::cout << "Mesh dimensions must be odd!" << std::endl;
+        return 1;
+    }
+    // generate track histories
+    execute_walk(Np);
     // Load particle collision history
     particleTrack dataTrack = read_array("event_history.txt");
     // generate mesh
-    twoDmesh mesh = gen_mesh(NI, NJ, NK, DX, DY, DZ);
+    twoDmesh mesh = gen_mesh(N, h);
     // start tallying
-    seq_tally(dataTrack, mesh, NI, NJ, NK);
+    seq_tally(Np, dataTrack, mesh);
 
     return 0;
 }
