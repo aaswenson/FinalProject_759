@@ -43,10 +43,9 @@ class collision_event{
             y = data.y_pos[trackID];
             z = data.z_pos[trackID];
             // load data for new particle
-            vox_ID[0] = N/2 + (int)x*dvox/2;
-            vox_ID[1] = N/2 + (int)y*dvox/2;
-            vox_ID[2] = N/2 + (int)z*dvox/2;
-            
+            vox_ID[0] = (int)((floor(x/(dvox/2)) + N)/2);
+            vox_ID[1] = (int)((floor(y/(dvox/2)) + N)/2);
+            vox_ID[2] = (int)((floor(z/(dvox/2)) + N)/2);
             u = data.u[trackID];
             v = data.v[trackID];
             w = data.w[trackID];
@@ -78,18 +77,13 @@ class collision_event{
             sx = (checkx-x)/u;
             sy = (checky-y)/v;
             sz = (checkz-z)/w;
-            s = sx;
-            int inc_idx = 0;
-            float inc_val = u;
             
-            if (sy < s){
-                s = sy; inc_val = v; inc_idx = 1;
-            }else if (sz < s){ 
-                s = sz; inc_val = w; inc_idx = 2;
-            }
+            s = std::min(sx, std::min(sy, sz));
+
             if (rtl > s){
-                // only increment voxel if we leave the box
-                inc_vox[inc_idx] = (int)(inc_val / fabs(inc_val));
+                if (sx == s){inc_vox[0] = (u > 0) ? 1:-1;}
+                if (sy == s){inc_vox[1] = (v > 0) ? 1:-1;}
+                if (sz == s){inc_vox[2] = (w > 0) ? 1:-1;}
             }
         }
         
@@ -111,6 +105,7 @@ class collision_event{
                 update_pos(rtl);
                 rtl = 0;
             }
+            assert(mesh.flux[tl_idx] > 0);
         }
 
         void update_voxel_ID(){
@@ -154,8 +149,15 @@ void seq_tally(int N, particleTrack col_data, twoDmesh mesh){
         collision_event particle(mesh);
                 
         for (int partID = 0; partID <col_data.Ntracks; partID++){
-            particle.start_track(partID, col_data);
-            particle.walk_particle();
+            if(abs(col_data.x_pos[partID]) < abs(mesh.x[0]) && 
+               abs(col_data.y_pos[partID]) < abs(mesh.y[0]) &&
+               abs(col_data.z_pos[partID]) < abs(mesh.z[0])){
+               particle.start_track(partID, col_data);
+               particle.walk_particle();
+            }
+            //else{
+            
+           // }
         }
         
         for (int i =0; i<mesh.N*mesh.N*mesh.N; i++){
