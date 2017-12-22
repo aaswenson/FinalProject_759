@@ -3,13 +3,13 @@ EP759 Final Project
 
 How to compile the code 
 -------------------
-In order to compile the code, run make. An executable called par\_walk\_tally will be created. 
+In order to compile the code, run make. An executable called par\_tally will be created. 
 This executable needs to be run with three arguments:
 1. Number of particle 
-2. Number of mesh voxels on any direction
+2. Number of mesh voxels in any direction
 3. Voxel size on any direction 
 
-Example: ./par\_walk\_tally 50 21 0.5
+Example: ./par\_tally 50 21 0.5
 
 This excutable will run 100 particles, and create a 50 x 50 x 50 mesh with voxel size 0.5. 
 
