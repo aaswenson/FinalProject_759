@@ -12,11 +12,11 @@ through the voxel. If the particle track crossed the voxel, a particle contribut
 is tallied. In this case, the particle contribution is quantified as flux. 
 
 \subsection{Block dimensions and grid dimension set-up}
-To set up the grid dimenions and block dimesions, we first considered the max number of 
-threds per dimension in a 3D block. 
+To set up the grid dimenions and block dimensions, we first considered the max number of 
+threads per dimension in a 3D block. 
 The grid dimesions were chosen to be a 1D array of blocks. The number of blocks 
-needed per simulation is calculated using the dimesions of the mesh and the 
-dimensions of the block. This allowed us to have a thread per voxel  while 
+needed per simulation was calculated using the dimesions of the mesh and the 
+dimensions of the block. This allowed us to launch one thread per voxel, while 
 minimizing the number the number of blocks per grid. 
 
 \subsection{Memory Issues}
