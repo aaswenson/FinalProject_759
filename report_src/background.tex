@@ -15,10 +15,10 @@ This degree of accuracy however is prequisite to an adequately-sampled geometry
 with good statistics. These statistics are often improved with more particle
 histories, which impacts not only the time required to generate the histories,
 but the time to tally the histories on a mesh. Computation time becomes more of
-for fine mesh grids over large geometric space. This is the motivation for mesh
+an issue for fine mesh grids over large geometric space. This is the motivation for mesh
 tally accelerations.
 
-The goal of tallying procedures is to convert the particle walk histories,
+The goal of tallying procedures is to convert the particle walk histories
 to bins of particle fluence (volume-averaged) in discretized space (cartesian
 voxels). This calculation is traditionally performed by CPUs and can be a
 significantly large fraction of calculation time.
@@ -32,7 +32,7 @@ We used a toy scattering problem to test the effectiveness of GPU-computing for
 mesh tallying. We created a sphere of arbitrary radius to test the mesh. Within
 the sphere, we performed random walks with test particles. We sampled particle
 tracks randomly in both direction and length as they scattered through and
-(eventually) out of the sphere. All particles originated from the originn and
+(eventually) out of the sphere. All particles originated from the origin and
 as they  walked through
 the sphere, we recorded their scattering locations to be tallied later. Two
 parameters were important to consider in the toy problem, sphere radius and mean
