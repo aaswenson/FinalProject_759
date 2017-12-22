@@ -1,21 +1,21 @@
 # Warnings
-WFLAGS	:= -Wall -Wextra -Wsign-conversion -Wsign-compare
+WFLAGS  := -Wall -Wextra -Wsign-conversion -Wsign-compare
 
 # Optimization and architecture
-OPT		:= -O3 
-ARCH   	:= -march=native
+OPT             := -O3
+ARCH    := -march=native
 
 # Language standard
-CCSTD	:= -std=c99
-CXXSTD	:= -std=c++11
+CCSTD   := -std=c99
+CXXSTD  := -std=c++11
 
 # Linker options
-LDOPT 	:= $(OPT)
+LDOPT   := $(OPT)
 LDFLAGS := -fopenmp -lpthread -mavx
 BIN = "/usr/local/gcc/6.4.0/bin/gcc"
 
 # Names of executables to create
-EXEC := random_walk seq_tally par_walk_tally
+EXEC := par_walk
 
 # Includes
 Linked_Libs := ~/opt/moab/include
@@ -28,17 +28,15 @@ debug : LDFLAGS := -fsanitize=address
 debug : ARCH :=
 debug : $(EXEC)
 
-all : $(EXEC) test_execs
+all : $(EXEC) par_walk_tally
 
-seq_tally : seq_tally.cpp
-	@ echo Building $@...
-	@ $(CXX) $(CXXSTD) -g -I$(Linked_Libs) -L$(Linked_Libs) -o $@ $< $(LDFLAGS) $(OPT)
 
-par_walk: par_walk_tally.cu 
-	nvcc -g -o par_walk_tally $(OPT) $(CXXSTD) par_walk_tally.cu
+par_walk: par_walk_tally.cu
+	module load cuda;nvcc -g -o par_walk_tally $(OPT) $(CXXSTD) par_walk_tally.cu -ccbin $(BIN)
 
 # TODO: add targets for building executables
 
 .PHONY: clean
 clean:
-	@ rm -f $(EXEC) $(OBJS) *.out event_history.txt
+@ rm -f $(EXEC) $(OBJS) *.out event_history.txt
+
