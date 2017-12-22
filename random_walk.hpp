@@ -1,12 +1,6 @@
-#include <iostream>
-#include <cstdio>
-#include <cmath>
-#include <vector>
-#include <fstream>
-#include <iomanip>
 #include <random>
 
-#define SPHERE_RADIUS 10
+#define SPHERE_RADIUS 100
 #define MEAN_FREE_PATH 3
 #define SEED 123
 #define SET_COL 15
@@ -136,15 +130,3 @@ void execute_walk(int N){
 
     event_history.close();
 }
-
-
-
-//    int main(int argc, char** argv){
-//        if(argc != 2){
-//          std::cout << "Usage N_particles" << std::endl;
-//        }
-//        int N = atoi(argv[1]);
-//        execute_walk(N);
-//
-//        return 0;
-//    }
