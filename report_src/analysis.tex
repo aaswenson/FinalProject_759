@@ -6,7 +6,7 @@ The first case explored was done by holding the number of particles,
 the mean free path of the particle, and the volume of the mesh constant while changing 
 the number of voxels. Figure \ref{compare1} show the results for this analysis. 
 
-\begin{figure}[H]
+\begin{figure}[]
  \begin{centering}
  \centering
  \includegraphics[width=0.6\linewidth,height=8cm]{../figs/compare.png}
@@ -23,27 +23,41 @@ The second part of the analysis was done by using a mesh size with constant meas
 and changing the mean free path of the particles. 
 
 
-\begin{figure}[H]
+\begin{figure}[]
  \begin{centering}
  \centering
- \includegraphics[width=0.6\linewidth,height=7cm]{../figs/mean_free_path.png}
+ \includegraphics[width=0.6\linewidth,height=8cm]{../figs/mean_free_path.png}
  \caption{Comparison of sequential and parallel methods by changing the mean free path of the particle}
  \label{mean_free_path}
  \end{centering}
 \end{figure}
 
 
-
 The third scaling analysis was done using a mesh size with constant parameters and 
-changing the number of particles run. Increasig the number of particles increases the 
-number of tracks the code has to loop through. Figure \ref{particles} show the scaling results 
-for this case. 
-\begin{figure}[H]
+changing the number of particles run. Increasing the number of particles increases the 
+number of particle tracks the code loops through. Figure \ref{particles} shows the scaling results for this case. 
+\begin{figure}[]
  \begin{centering}
  \centering
- \includegraphics[width=0.6\linewidth,height=7cm]{../figs/particles.png}
+ \includegraphics[width=0.6\linewidth,height=8cm]{../figs/particles.png}
  \caption{Comparison of sequential and parallel methods by changing the number of particles}
  \label{particles}
  \end{centering}
 \end{figure}
+
+\begin{figure}[]
+ \begin{centering}
+ \centering
+ \includegraphics[width=0.6\linewidth,height=8cm]{../figs/memory.png}
+ \caption{Percentage of parallel compute time spent on memory transfer.}
+ \label{memory}
+ \end{centering}
+\end{figure}
+
+For our final comparison, we investigated the time our parallel algorithm spent
+on memory transfer. Figure \ref{memory} plots the percentage of time spent
+transferring data as a function of problem size  (number of particles). For
+small numbers of particles, the problem is memory transfer dominated however,
+as more particles are tracked, memory transfer is a smaller factor in overall
+compute time.
 

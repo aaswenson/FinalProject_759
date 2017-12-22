@@ -7,17 +7,17 @@ are then performed to translate this random walk information to useful mesh
 tallies. These calculations are usually executed on CPUs and often account for a
 significant portion of overall problem computation time. We attempted to
 accelerate a toy mesh tally routine using GPUs. Traditionally, CPU threads track
-particles through the mesh, tally the particle contribution as the particle
+particles through the mesh and tally the particle contribution as the particle
 passes through mesh voxels. Our GPU approach launched a GPU thread for every
-voxel in space, checking each particle track for contribution to it's voxel.
-The philosophy of this acceleration was that computation time would scale
-favorably with increasing mean free path. The number of distance to crossing
+voxel in space, checking each particle track for contribution to its voxel.
+The philosophy of this acceleration attempt was that computation time would scale
+favorably with increasing particle mean free path. The number of distance to crossing
 calculations is independent of path length on the GPU since every thread checks
 every particle track once, where the CPU may perform many of these crossings
 when a particle tracks through numerous voxels. The memory constraints of the
 GPU ultimately derailed the acceleration effort. Storing flux data for lots of
-particles on a fine-grained mesh requires a large amount of memory. Our problem
-size quickly exceeded the limits of shared memory on the GPU. This was a
+particles on a fine-grained mesh, as well as the mesh itself, required a large amount of memory. 
+Our problem size quickly exceeded the limits of shared memory on the GPU. This was a
 hindrance to our parallel code especially since the surface crossing queries
 required numerous global memory accesses per block. The problem appears to be
 memory-bound, and GPU applications seem to be limited.
