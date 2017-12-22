@@ -23,11 +23,11 @@ minimizing the number the number of blocks per grid.
 For this algorithm, we decided to use global memory instead of shared memory. 
 The reason for this is we found limitations on the amount of shared memory we 
 could access with one kernel call. In the type of problems we were addressing, 
-we typically find large number of voxels in the geomtry mesh which would require 
-large memory allocation. 
- 
- 
-Stuff about how the algorithm works.
+we typically find large number of voxels in the geometry mesh which would require 
+large memory allocation. For example having a 40 x 40 x 40 mesh means 64,000 
+voxels, if we want to store a float in each one of these voxels, we would need 
+256 kB which is over the amount of shared memory we can have per multiprocessor.   
+
 
 The philosophy of this approach is to make the compute time independent of
 particle mean free path. Since every thread checks every particle at one point
