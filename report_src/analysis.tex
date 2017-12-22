@@ -2,8 +2,8 @@
 \section{Benchmark Analysis}
 In order to quantify the success of our efforts, we performed a scaling analysis 
 using a python script to plot different use cases.   
-The first case explored was done by holding the number of particles, 
-the mean free path of the particle, and the volume of the mesh constant while changing 
+The first case explored held the number of particles, 
+particle mean free path, and total mesh volume constant while changing 
 the number of voxels. Figure \ref{compare1} show the results for this analysis. 
 
 \begin{figure}[]
@@ -16,12 +16,11 @@ the number of voxels. Figure \ref{compare1} show the results for this analysis.
 \end{figure}
 
 In figure \ref{compare1}, we see that the sequential code runs faster than the 
-parallel code. There are multiple explanation for this, but the most probably is the 
-overheard related to memory access.
+parallel code. There are multiple explanations for this, but the most likely is 
+memory access overhead.
 
-The second part of the analysis was done by using a mesh size with constant measurements 
+The second part of the analysis was done using a mesh size with constant measurements 
 and changing the mean free path of the particles. 
-
 
 \begin{figure}[]
  \begin{centering}
@@ -31,7 +30,9 @@ and changing the mean free path of the particles.
  \label{mean_free_path}
  \end{centering}
 \end{figure}
-
+Mean free path had a negative correlation with compute time. This is because
+particles scatter out of the mesh (and the computation) faster with larger mean
+free paths.
 
 The third scaling analysis was done using a mesh size with constant parameters and 
 changing the number of particles run. Increasing the number of particles increases the 
