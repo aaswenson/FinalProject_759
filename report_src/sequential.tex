@@ -1,6 +1,5 @@
 %%%%%%%%%%%%%%% sequential methods %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Sequential Methods}
-
 The sequential code tracks each particle through a uniform, structured,
 cartesian mesh. As each particle passes through mesh voxels, they contribute a
 portion of their track length to the flux tally of the voxel. This process
@@ -15,7 +14,7 @@ s = \frac{X_i - \vec{r}_i}{\vec{v}_i}
 Where $X_i$ is a normal plane in (x,y,z) space, $\vec{r}_i$ is the particle's
 initial position, and $\vec{v}_i$ is the unit velocity vector.
 
-Each voxel requires at minimum, three surface checks for crossing. Surfaces with
+Each voxel requires three surface checks for crossing. Surfaces with
 signs opposite of their respective particle velocity component can be neglected,
 if the particle is traveling away from a surface, it will never cross that it.
 Once the three eligible surfaces are selected, the minimum distance to crossing
@@ -29,6 +28,6 @@ The sequential code computes the track-length contribution on the mesh from
 every particle history in serial. This is a computationally expensive process,
 especially when particles have a large mean free path relative to the mesh
 spacing. When this is the case, single tracks traverse a large number of mesh
-points, each of which require (at minimum) three surface crossing calculations.
+points, each of which require three surface crossing calculations.
 
 
