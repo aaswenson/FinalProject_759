@@ -5,13 +5,8 @@ research. Speeding up tallying on a geometric mesh is important to our work
 as these meshes get very large, and tallying them often takes a long time
 using sequential methods. In this project and report we set
 forth a new algorithm for parallelized mesh tallying with CUDA. 
-From the analysis work, we see that we did not get a speed up compared 
-to the sequential code we developed. One possible explanation for this 
-behaviour is that the methods used in this project are not optimizing 
-the amount of memory used. Using global memory hurt the performance of our code.
 As shown by our analysis, we did not achieved desired speed ups with our
-parallel algorithm. 
-A probable explanation for this poor parallel performance is the under-use of
+parallel algorithm. A probable explanation for this poor parallel performance is the under-use of
 shared memory. Using global memory hurt the performance of our code;
 it was an unfortunate impact of the large problems encountered in mesh tallying.
 Future work in optimizing/minimizing memory usage on the device may yield
