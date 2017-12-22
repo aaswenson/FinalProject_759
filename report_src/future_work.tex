@@ -10,10 +10,18 @@ then the algorithm is falsely ignoring the track. This affects our final tallyin
 flux. 
 
 
-There are also issues to be addressed with the parallel algorithm. The biggest one is that 
-concerned with mesh sizes. The algorithm throwns a segfault if the mesh size combined 
-with the mesh resolutions is too big. 
+There are issues to be addressed with the parallel algorithm. 
+From the analysis work, we see that the parallel algorithm is slower than the 
+the sequential algorithm. The hypothesis is that this algorithm has a memory 
+bound problem and a better understanding of memory usage is necessary to improve 
+this algorithm. This is an important next step as it will help quantify if using GPU 
+with the proposed algorithm is of interest.  
 
-Another improvement for this code is to add other parameters that will help 
+Another concern is related to mesh sizes. The algorithm segfaults if the mesh size 
+combined with the mesh resolutions is too big. This issue might also be related to 
+memory issues. 
+
+Another improvement for this code could be to add other parameters that will help 
 describe better the physics of the system. One important parameter is the 
-energy of the particle. This will allow 
+energy of the particle. 
+
