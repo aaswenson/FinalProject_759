@@ -8,10 +8,11 @@
 #include <cuda.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <gen_mesh.cpp>
-#include <random_walk.cpp>
-#include <read_methods.cpp>
-#include <cuda_prep.cu>
+#include "gen_mesh.hpp"
+#include "random_walk.hpp"
+#include "read_methods.hpp"
+#include "cuda_prep.hpp"
+#include "seq_tally.hpp"
 
     
 __global__  void parallel_walk(unsigned int Ngrid, unsigned int N, float* x, float* y, float* z,
@@ -31,7 +32,6 @@ __global__  void parallel_walk(unsigned int Ngrid, unsigned int N, float* x, flo
     float tmin, tmax, savet;
     float x_surfs[2], y_surfs[2], z_surfs[2];
     float V = h*h*h; 
-    int intersect;
     gflux[tl_ID] = 0;
 
 
@@ -105,7 +105,7 @@ __global__  void parallel_walk(unsigned int Ngrid, unsigned int N, float* x, flo
 }
 
 void par_tally(twoDmesh hmesh, particleTrack hdata, int N, float h){
-    
+
     particleTrack ddata = AllocatePtracData(hdata);
     twoDmesh dmesh = AllocateMeshData(hmesh);
     CopyDatatoDevice(ddata, hdata, dmesh, hmesh);
@@ -119,36 +119,37 @@ void par_tally(twoDmesh hmesh, particleTrack hdata, int N, float h){
         grid_dim = 1;
         max_dim = N;
     }
-    std::cout << "block dim " << max_dim << std::endl;
-    std::cout << "N blocks " << grid_dim << std::endl;
     dim3 dimBlock(max_dim, max_dim, max_dim);
     //dim3 dimGrid(grid_dim, grid_dim, grid_dim);
     dim3 dimGrid(grid_dim, 1, 1);
     
+    
+    // time the kernel w/out memory transfer
+    float elapsedTime_ex; 
+    cudaEvent_t startEvent_par_ex, stopEvent_par_ex;
+	
+    cudaEventCreate(&startEvent_par_ex);
+	cudaEventCreate(&stopEvent_par_ex);
+    cudaEventRecord(startEvent_par_ex,0);
 
     parallel_walk<<<dimGrid,dimBlock>>> (N, ddata.Ntracks, dmesh.x, dmesh.y, dmesh.z, 
             h, dmesh.flux, ddata.x_pos, ddata.y_pos, ddata.z_pos,
          ddata.u, ddata.v, ddata.w, ddata.track_length);
 
+    // stop timer
+	cudaEventRecord(stopEvent_par_ex,0);
+	cudaEventSynchronize(stopEvent_par_ex);   
+	cudaEventElapsedTime(&elapsedTime_ex, startEvent_par_ex, stopEvent_par_ex);
+    
+    std::cout << "Parallel w/out mem    "<<elapsedTime_ex << std::endl;
+    // copy data back to device
     cudaMemcpy(hmesh.flux, dmesh.flux, flux_size, 
 			cudaMemcpyDeviceToHost);
-    
 
-    cudaFree(dmesh.flux);
-    cudaFree(dmesh.x);
-    cudaFree(dmesh.y);
-    cudaFree(dmesh.z);
-    cudaFree(ddata.x_pos);
-    cudaFree(ddata.y_pos);
-    cudaFree(ddata.z_pos);
-    cudaFree(ddata.u);
-    cudaFree(ddata.v);
-    cudaFree(ddata.w);
-    cudaFree(ddata.track_length);
-    cudaFree(dmesh.flux);
-
-
+    // free memory on device and host
+    free_dev_mem(dmesh, ddata);
 }
+
 
 
 int main(int argc, char* argv[]){
@@ -171,14 +172,45 @@ int main(int argc, char* argv[]){
     particleTrack hdata = read_array("event_history.txt");
     // generate mesh
     twoDmesh hmesh = gen_mesh(N, h);
+    // generate mesh
+    twoDmesh seq_mesh = gen_mesh(N, h);
     
+    
+	//defining variables for timing
+	cudaEvent_t startEvent_seq, stopEvent_seq, 
+                startEvent_par, stopEvent_par;
+	cudaEventCreate(&startEvent_seq);
+	cudaEventCreate(&stopEvent_seq);
+	cudaEventCreate(&startEvent_par);
+	cudaEventCreate(&stopEvent_par);
+	
+    float elapsedTime_par, elapsedTime_seq;
+    
+    // start timer
+    cudaEventRecord(startEvent_seq,0);
+    // sequential tally
+    seq_tally(N, hdata, seq_mesh);
+    // stop timer
+	cudaEventRecord(stopEvent_seq,0);
+	cudaEventSynchronize(stopEvent_seq);   
+	cudaEventElapsedTime(&elapsedTime_seq, startEvent_seq, stopEvent_seq);
+
+    // start timer
+	cudaEventRecord(startEvent_par,0);
+    // parallel tally
     par_tally(hmesh, hdata, N, h); 
+    // stop timer
+	cudaEventRecord(stopEvent_par,0);
+	cudaEventSynchronize(stopEvent_par);   
+	cudaEventElapsedTime(&elapsedTime_par, startEvent_par, stopEvent_par);
     
-    for(int i=0;i<N*N*N;i++){
-        std::cout << hmesh.flux[i] << std::endl;
-    }
+    // print timing results
+    std::cout <<"Parallel w/mem    " << elapsedTime_par << std::endl;
+    std::cout <<"Sequential    " << elapsedTime_seq << std::endl;
     
+
     free(hmesh.flux);
+    free(seq_mesh.flux);
     
     return 0;
 }
