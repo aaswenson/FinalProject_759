@@ -1,0 +1,19 @@
+%%%%%%%%%%%%%%% Future work %%%%%%%%%%
+\section{Future Work}
+There are multiple oportunities for improvement of this work. On first outlook, 
+the sequential part of this code is not handiling all the possible cases correctly. \
+An example of this is related to the particle track, if a particle track starting 
+outside the mesh, the algorithm set forth in \texttt{seq\_tally.cpp} will ignore this 
+track and no contribution will be added to the flux. 
+A problem arise if the particle track starts outside the mesh, but end inside the mesh, 
+then the algorithm is falsely ignoring the track. This affects our final tallying of the 
+flux. 
+
+
+There are also issues to be addressed with the parallel algorithm. The biggest one is that 
+concerned with mesh sizes. The algorithm throwns a segfault if the mesh size combined 
+with the mesh resolutions is too big. 
+
+Another improvement for this code is to add other parameters that will help 
+describe better the physics of the system. One important parameter is the 
+energy of the particle. This will allow 
