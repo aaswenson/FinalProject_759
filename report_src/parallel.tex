@@ -5,8 +5,28 @@ completely restructuring the calculation strategy. Instead of looping through
 every particle and tracking it through space, the parallel code assigns a thread
 to every voxel in space. Each thread performs a line-box intersection qeuery,
 tallying the particle contribution where appropriate. Every thread must check
-every particle.
+every particle track. 
 
+The line-box intersection query is used to check if the particle track passes 
+through the voxel. If the particle track crossed the voxel, a particle contribution 
+is tallied. In this case, the particle contribution is quantified as flux. 
+
+\subsection{Block dimensions and grid dimension set-up}
+To set up the grid dimenions and block dimesions, we first considered the max number of 
+threds per dimension in a 3D block. 
+The grid dimesions were chosen to be a 1D array of blocks. The number of blocks 
+needed per simulation is calculated using the dimesions of the mesh and the 
+dimensions of the block. This allowed us to have a thread per voxel  while 
+minimizing the number the number of blocks per grid. 
+
+\subsection{Memory Issues}
+For this algorithm, we decided to use global memory instead of shared memory. 
+The reason for this is we found limitations on the amount of shared memory we 
+could access with one kernel call. In the type of problems we were addressing, 
+we typically find large number of voxels in the geomtry mesh which would require 
+large memory allocation. 
+ 
+ 
 Stuff about how the algorithm works.
 
 The philosophy of this approach is to make the compute time independent of

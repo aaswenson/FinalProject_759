@@ -26,7 +26,7 @@ the volume-averaged voxel flux. If the particle track is shorter than distance
 to crossing, the contribution is adjusted accordingly.
 
 The sequential code computes the track-length contribution on the mesh from
-every particle history in serial. This is an computationally expensive process,
+every particle history in serial. This is a computationally expensive process,
 especially when particles have a large mean free path relative to the mesh
 spacing. When this is the case, single tracks traverse a large number of mesh
 points, each of which require (at minimum) three surface crossing calculations.
