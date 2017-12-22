@@ -4,7 +4,7 @@ The parallel code takes advantage of the GPU's unique computing capability by
 completely restructuring the calculation strategy. Instead of looping through
 every particle and tracking it through space, the parallel code assigns a thread
 to every voxel in space. Each thread performs a line-box intersection qeuery,
-tallying the particle contribution where appropriate. Every thread must check
+tallying the particle contribution where appropriate\cite{ray_trace}. Every thread must check
 every particle track. 
 
 The line-box intersection query is used to check if the particle track passes 
