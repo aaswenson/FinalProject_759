@@ -20,15 +20,12 @@ dimensions of the block. This allowed us to launch one thread per voxel, while
 minimizing the number the number of blocks per grid. 
 
 \subsection{Memory Issues}
-For this algorithm, we decided to use global memory instead of shared memory. 
-The reason for this is we found limitations on the amount of shared memory we 
+For this algorithm, we were forced to use global memory instead of shared memory. 
+Unfortunately we were limited by the amount of shared memory we 
 could access with one kernel call. In the type of problems we were addressing, 
 we typically find large number of voxels in the geomtry mesh which would require 
 large memory allocation. 
- 
- 
-Stuff about how the algorithm works.
-
+  
 The philosophy of this approach is to make the compute time independent of
 particle mean free path. Since every thread checks every particle at one point
 in space, the compute time is a fixed function of mesh size and the number of
