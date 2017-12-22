@@ -19,6 +19,5 @@ GPU ultimately derailed the acceleration effort. Storing flux data for lots of
 particles on a fine-grained mesh requires a large amount of memory. Our problem
 size quickly exceeded the limits of shared memory on the GPU. This was a
 hindrance to our parallel code especially since the surface crossing queries
-required numerous global memory accesses per thread. The problem seems to be
+required numerous global memory accesses per block. The problem appears to be
 memory-bound, and GPU applications seem to be limited.
-

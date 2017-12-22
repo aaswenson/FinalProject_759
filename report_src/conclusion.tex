@@ -1,13 +1,14 @@
 %%%%%%%%%%%%%%% Conclusion %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
-This work is of interest to us because it is related to our field of 
-research. Speeding up the tallying on a geometric mesh is of interest 
-as these meshes can get very big and can take a long time to tally 
-them up with sequential techniques. In this project and report we set
-forth a new algorithm for parallization with CUDA. 
+This work interested us because it is related to our field of 
+research. Speeding up tallying on a geometric mesh is important to our work 
+as these meshes get very large and tallying on them often takes a long time
+using sequential methods. In this project and report we set
+forth a new algorithm for parallized mesh tallying with CUDA. 
 From the analysis work, we see that we did not get a speed up compared 
 to the sequential code we developed. One possible explanation for this 
 behaviour is that the methods used in this project are not optimizing 
-the amount of memory used. Namely using global memory might not have 
-been the best way to deal with the fact that we write to many spaces 
-as we have mesh voxels. 
+the amount of memory used. Using global memory hurt the performance of our code.
+it was an unfortunate impact of the large problems encountered in mesh tallying.
+Future work in optimizing/minimizing memory usuage on the device may yield
+better results.
