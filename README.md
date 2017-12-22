@@ -1,6 +1,21 @@
 EP759 Final Project
 ===================
 
+How to compile the code 
+-------------------
+In order to compile the code, run make. An executable called par\_walk\_tally will be created. 
+This executable needs to be run with three arguments:
+1. Number of particle 
+2. Number of mesh voxels on any direction
+3. Voxel size on any direction 
+
+Example: ./par\_walk\_tally 50 21 0.5
+
+This excutable will run 100 particles, and create a 50 x 50 x 50 mesh with voxel size 0.5. 
+
+Something to note is that the number of mesh voxels, second input, must always be odd. 
+
+
 Problem statement 
 -----------------
 We will investigate various configurations of GPU acceleration for parallelized particle tallying in Monte Carlo physics problems. The goal of this project is to explore computational options and attempt to improve the calculation time in mesh tally problems. 
