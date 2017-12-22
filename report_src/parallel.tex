@@ -4,8 +4,8 @@ The parallel code takes advantage of the GPU's unique computing capability by
 completely restructuring the calculation strategy. Instead of looping through
 every particle and tracking it through space, the parallel code assigns a thread
 to every voxel in space. Each thread performs a line-box intersection qeuery,
-tallying the particle contribution where appropriate\cite{ray_trace}. Every thread must check
-every particle track. 
+tallying the particle contribution where appropriate\cite{ray_trace}. Every
+thread must check every particle track. 
 
 The line-box intersection query is used to check if the particle track passes 
 through the voxel. If the particle track crossed the voxel, a particle contribution 
@@ -26,7 +26,7 @@ could access with one kernel call. In the type of problems we were addressing,
 we typically find large number of voxels in the geometry mesh which would require 
 large memory allocation. For example having a 40 x 40 x 40 mesh means 64,000 
 voxels, if we want to store a float in each one of these voxels, we would need 
-256 kB which is over the amount of shared memory we can have per multiprocessor.   
+256 kB which is over-budget on shared memory per multiprocessor.   
 
 
 The philosophy of this approach is to make the compute time independent of
@@ -34,4 +34,3 @@ particle mean free path. Since every thread checks every particle at one point
 in space, the compute time is a fixed function of mesh size and the number of
 problem particles. Even if the particles traverse a large number of voxels, The
 same 6 calculations are performed per particle, per voxel.
-
