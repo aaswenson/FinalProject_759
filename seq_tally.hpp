@@ -1,15 +1,3 @@
-#include <assert.h>
-#include <iostream>
-#include <algorithm>
-#include <cstdio>
-#include <cmath>
-#include <vector>
-#include <fstream>
-#include <iomanip>
-#include "gen_mesh.cpp"
-#include "random_walk.cpp"
-#include "read_methods.cpp"
-
 class collision_event{
     public:
         twoDmesh mesh;
@@ -105,7 +93,6 @@ class collision_event{
                 update_pos(rtl);
                 rtl = 0;
             }
-            assert(mesh.flux[tl_idx] > 0);
         }
 
         void update_voxel_ID(){
@@ -155,38 +142,5 @@ void seq_tally(int N, particleTrack col_data, twoDmesh mesh){
                particle.start_track(partID, col_data);
                particle.walk_particle();
             }
-            //else{
-            
-           // }
         }
-        
-        for (int i =0; i<mesh.N*mesh.N*mesh.N; i++){
-        std::cout<< mesh.flux[i] << std::endl;
-        }        
-}
-
-
-int main(int argc, char* argv[]){
-
-    if (argc != 4){
-        std::cout << "Usage: N_particles Nx Ny Nz hx hy hz" << std::endl;
-        return 1;
-    }
-    const unsigned Np = atoi(argv[1]);
-    const unsigned N = atoi(argv[2]);
-    const float h = atof(argv[3]); 
-    if (N%2==0){
-        std::cout << "Mesh dimensions must be odd!" << std::endl;
-        return 1;
-    }
-    // generate track histories
-    execute_walk(Np);
-    // Load particle collision history
-    particleTrack dataTrack = read_array("event_history.txt");
-    // generate mesh
-    twoDmesh mesh = gen_mesh(N, h);
-    // start tallying
-    seq_tally(Np, dataTrack, mesh);
-
-    return 0;
 }

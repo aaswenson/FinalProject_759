@@ -1,6 +1,3 @@
-
-#include <cuda.h>
-
 // Allocate memory for ptrac data
 particleTrack AllocatePtracData(particleTrack hdata){
 	cudaError_t error;
@@ -84,17 +81,32 @@ void CopyDatatoDevice(particleTrack ddata, particleTrack hdata,
 
 }
 
+void free_dev_mem(twoDmesh dmesh, particleTrack ddata){
+    cudaFree(dmesh.flux);
+    cudaFree(dmesh.x);
+    cudaFree(dmesh.y);
+    cudaFree(dmesh.z);
+    cudaFree(ddata.x_pos);
+    cudaFree(ddata.y_pos);
+    cudaFree(ddata.z_pos);
+    cudaFree(ddata.u);
+    cudaFree(ddata.v);
+    cudaFree(ddata.w);
+    cudaFree(ddata.track_length);
+    cudaFree(dmesh.flux);
+}
+
 
 //compare the data stored in two arrays on the host
-bool CompareResults(float* A, float* B, int elements, float eps,float * error)
+float CompareResults(float* A, float* B, int elements, int Np)
 {
-	for(unsigned int i = 0; i < elements; i++){
-		float temp = sqrt((A[i]-B[i])*(A[i]-B[i]));
-		*error+=temp;
-		if(temp>eps){
-			return false;
-		} 
-	}
-	return true;
+	float sum=0;
+    float error=0;
+    for(unsigned int i = 0; i < elements; i++){
+		error += A[i] - B[i];
+        sum += A[i];
+    }
+     
+    return sum;
 }
 
