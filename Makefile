@@ -28,15 +28,15 @@ debug : LDFLAGS := -fsanitize=address
 debug : ARCH :=
 debug : $(EXEC)
 
-all : $(EXEC) par_walk_tally
+all : $(EXEC) par_tally
 
 
-par_walk: par_walk_tally.cu
-	module load cuda;nvcc -g -o par_walk_tally $(OPT) $(CXXSTD) par_walk_tally.cu -ccbin $(BIN)
+par_walk: par_tally.cu
+	module load cuda;nvcc -g -o par_tally $(OPT) $(CXXSTD) par_tally.cu -ccbin $(BIN)
 
 # TODO: add targets for building executables
 
 .PHONY: clean
 clean:
-@ rm -f $(EXEC) $(OBJS) *.out event_history.txt
+	@ rm -f $(EXEC) $(OBJS) *.out event_history.txt
 
