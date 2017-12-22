@@ -1,8 +1,8 @@
 %%%%%%%%%%%%%%% Future work %%%%%%%%%%
 \section{Future Work}
-There are multiple oportunities for improvement of this work. Most importantly, 
+There are multiple opportunities for improvement of this work. Most importantly, 
 the sequential part of this code is not correctly handling all particle-mesh
-interation cases. The incorrect case involves a particle track starting 
+interaction cases. The incorrect case involves a particle track starting 
 outside the mesh, the algorithm applied in \texttt{seq\_tally.cpp} will ignore this 
 track and no contribution will be added to the flux.
 A problem arises if the particle track starts outside the mesh, but end inside the mesh, 
